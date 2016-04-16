@@ -10,8 +10,6 @@ class Rotate extends Script {
     }
 
     update(dT) {
-        // console.log('Rotete.update', this.object.rotation, this.speed * dT);
-        // debugger;
         this.object.rotation += this.speed * (dT * PI2);
     }
 }

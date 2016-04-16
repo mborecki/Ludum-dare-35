@@ -6,6 +6,7 @@ class TestObject extends GameObject {
 
         this.addComponent(Engine.gameRenderer.createSprite('Smile'));
         this.addComponent(new BASIC_SCRIPTS.ROTATE())
+        this.addComponent(new BASIC_SCRIPTS.MOVE())
     }
 }
 

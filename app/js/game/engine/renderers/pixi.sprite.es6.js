@@ -29,7 +29,6 @@ class PIXISprite extends Component {
         this.sprite.position.x = object.x;
         this.sprite.position.y = object.y;
         this.sprite.rotation = object.rotation;
-        console.warn('TODO: PIXISprite.update');
     }
 
     destroy() {

@@ -1,6 +1,7 @@
 import _ from 'lodash'
 
 import Images from './images.es6';
+import Sounds from './sounds.es6';
 import Level from './level.es6';
 import GameObject from './gameObject.es6';
 import ObjectFactory from './objectFactory.es6';

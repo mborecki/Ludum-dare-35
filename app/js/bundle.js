@@ -47660,7 +47660,6 @@
 	            this.sprite.position.x = object.x;
 	            this.sprite.position.y = object.y;
 	            this.sprite.rotation = object.rotation;
-	            console.warn('TODO: PIXISprite.update');
 	        }
 	    }, {
 	        key: 'destroy',
@@ -47973,6 +47972,7 @@
 
 	        _this.addComponent(_engine2.default.gameRenderer.createSprite('Smile'));
 	        _this.addComponent(new _engine.BASIC_SCRIPTS.ROTATE());
+	        _this.addComponent(new _engine.BASIC_SCRIPTS.MOVE());
 	        return _this;
 	    }
 
@@ -47995,10 +47995,15 @@
 
 	var _rotate2 = _interopRequireDefault(_rotate);
 
+	var _move = __webpack_require__(164);
+
+	var _move2 = _interopRequireDefault(_move);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var index = {
-	    ROTATE: _rotate2.default
+	    ROTATE: _rotate2.default,
+	    MOVE: _move2.default
 	};
 
 	exports.default = index;
@@ -48044,8 +48049,6 @@
 	    _createClass(Rotate, [{
 	        key: 'update',
 	        value: function update(dT) {
-	            // console.log('Rotete.update', this.object.rotation, this.speed * dT);
-	            // debugger;
 	            this.object.rotation += this.speed * (dT * PI2);
 	        }
 	    }]);
@@ -48054,6 +48057,58 @@
 	}(_script2.default);
 
 	exports.default = Rotate;
+
+/***/ },
+/* 164 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _script = __webpack_require__(20);
+
+	var _script2 = _interopRequireDefault(_script);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var Move = function (_Script) {
+	    _inherits(Move, _Script);
+
+	    function Move(speed) {
+	        _classCallCheck(this, Move);
+
+	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Move).call(this));
+
+	        _this.speed = speed || {
+	            x: 1,
+	            y: 0
+	        };
+	        return _this;
+	    }
+
+	    _createClass(Move, [{
+	        key: 'update',
+	        value: function update(dT) {
+	            this.object.x += this.speed.x;
+	            this.object.y += this.speed.y;
+	        }
+	    }]);
+
+	    return Move;
+	}(_script2.default);
+
+	exports.default = Move;
 
 /***/ }
 /******/ ]);
