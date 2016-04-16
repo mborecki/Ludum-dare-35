@@ -52,6 +52,8 @@ class ObjectFactory {
 
         o.layer = config.layer || 0;
 
+        console.log('SPAWN: ' + typeName);
+
         return o.updateParams(params).create(!!config.dontAddToEngine);
     }
 }

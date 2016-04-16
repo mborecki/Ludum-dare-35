@@ -77,6 +77,11 @@ class GameObject {
         for (let i = 0; i < this.startScripts.length; i++) {
             this.startScripts[i].start();
         }
+
+        let c2 = this.sprites.length;
+        for (let j = 0; j < c2; j++) {
+            this.sprites[j].start(this);
+        }
     }
 
     update (dT) {
@@ -113,6 +118,8 @@ class GameObject {
         }
 
         component.object = this;
+
+        return component;
     }
 
     addScript (script) {

@@ -13,7 +13,10 @@ class PIXIRenderer {
     }
 
     get renderer() {
-        if (!this._renderer) this._renderer = new PIXI.autoDetectRenderer(800, 600);
+        if (!this._renderer) {
+            this._renderer = new PIXI.autoDetectRenderer(800, 600);
+            this._renderer.backgroundColor = '0xFF9999';
+        }
         return this._renderer;
     }
 

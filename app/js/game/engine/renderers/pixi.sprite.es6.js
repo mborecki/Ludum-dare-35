@@ -12,15 +12,18 @@ class PIXISprite extends Component {
 
         this.type = TYPE;
 
-        this.loadImage(imageName)
+        this.sprite = new PIXI.Sprite(PIXI.Texture.EMPTY);
 
+        if (imageName) {
+            this.loadImage(imageName)
+        }
 
     }
 
     loadImage(imageName) {
         let canvas = Images.getImage(imageName);
 
-        this.sprite = new PIXI.Sprite(PIXI.Texture.fromCanvas(canvas));
+        this.sprite.texture = PIXI.Texture.fromCanvas(canvas);
         this.sprite.anchor.x = 0.5;
         this.sprite.anchor.y = 0.5;
     }
@@ -29,6 +32,10 @@ class PIXISprite extends Component {
         this.sprite.position.x = object.x;
         this.sprite.position.y = object.y;
         this.sprite.rotation = object.rotation;
+    }
+
+    start(object) {
+        this.update(object);
     }
 
     destroy() {

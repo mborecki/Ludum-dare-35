@@ -14,7 +14,7 @@ class Images {
             img.height = params.size[1];
 
             let buffer = document.createElement('canvas');
-            this.images[name] = buffer;
+            this.addImage(name, buffer)
 
             img.onload = () => {
                 buffer.width = params.size[0];
@@ -35,6 +35,11 @@ class Images {
 
             img.src = params.url;
         })
+    }
+
+    addImage (name, canvas) {
+        if (typeof this.images[name] !== "undefined") console.warn(`Repeat image name: ${name}`);
+        this.images[name] = canvas;
     }
 
     getImage (name) {
