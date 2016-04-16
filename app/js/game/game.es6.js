@@ -43,6 +43,9 @@ class Game {
         Engine.Sounds.register('test-sound', {
             url: 'assets/sounds/test-sound.wav'
         })
+        Engine.Sounds.register('test-music', {
+            url: 'assets/music/150413_Piano_Sway---free_download.mp3'
+        })
     }
 
     initLevels() {

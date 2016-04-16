@@ -86,7 +86,7 @@
 
 	var _engine2 = _interopRequireDefault(_engine);
 
-	var _test = __webpack_require__(164);
+	var _test = __webpack_require__(166);
 
 	var _test2 = _interopRequireDefault(_test);
 
@@ -138,6 +138,9 @@
 	        value: function registerSounds() {
 	            _engine2.default.Sounds.register('test-sound', {
 	                url: 'assets/sounds/test-sound.wav'
+	            });
+	            _engine2.default.Sounds.register('test-music', {
+	                url: 'assets/music/150413_Piano_Sway---free_download.mp3'
 	            });
 	        }
 	    }, {
@@ -1077,35 +1080,35 @@
 
 	var _sounds2 = _interopRequireDefault(_sounds);
 
-	var _level = __webpack_require__(17);
+	var _level = __webpack_require__(18);
 
 	var _level2 = _interopRequireDefault(_level);
 
-	var _gameObject = __webpack_require__(18);
+	var _gameObject = __webpack_require__(19);
 
 	var _gameObject2 = _interopRequireDefault(_gameObject);
 
-	var _objectFactory = __webpack_require__(19);
+	var _objectFactory = __webpack_require__(20);
 
 	var _objectFactory2 = _interopRequireDefault(_objectFactory);
 
-	var _component = __webpack_require__(20);
+	var _component = __webpack_require__(21);
 
 	var _component2 = _interopRequireDefault(_component);
 
-	var _script = __webpack_require__(21);
+	var _script = __webpack_require__(22);
 
 	var _script2 = _interopRequireDefault(_script);
 
-	var _index = __webpack_require__(22);
+	var _index = __webpack_require__(23);
 
 	var _index2 = _interopRequireDefault(_index);
 
-	var _pixi = __webpack_require__(25);
+	var _pixi = __webpack_require__(27);
 
 	var _pixi2 = _interopRequireDefault(_pixi);
 
-	var _math = __webpack_require__(162);
+	var _math = __webpack_require__(164);
 
 	var _math2 = _interopRequireDefault(_math);
 
@@ -1154,7 +1157,6 @@
 	            for (var i = 0; i < oCount; i++) {
 	                var o = this.objects[i];
 	                if (!o.destroyed) {
-	                    console.log('o.start');
 	                    o.start();
 	                }
 	            }
@@ -1244,7 +1246,6 @@
 	    }, {
 	        key: 'addObject',
 	        value: function addObject(object) {
-	            console.log('addObject', object);
 	            if (object.isDrawable) {
 	                this.gameRenderer.add(object);
 	            }
@@ -1337,10 +1338,6 @@
 	e.Script = _script2.default;
 
 	exports.default = e;
-
-
-	console.log(_component2.default);
-
 	exports.PIXI = PIXI;
 	exports.Level = _level2.default;
 	exports.GameObject = _gameObject2.default;
@@ -17488,7 +17485,7 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _nodeBuzz = __webpack_require__(166);
+	var _nodeBuzz = __webpack_require__(17);
 
 	var _nodeBuzz2 = _interopRequireDefault(_nodeBuzz);
 
@@ -17526,6 +17523,715 @@
 
 /***/ },
 /* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__; // ----------------------------------------------------------------------------
+	 // Buzz, a Javascript HTML5 Audio library
+	 // v1.1.4 - released 2014-07-13 11:19
+	 // Licensed under the MIT license.
+	 // http://buzz.jaysalvat.com/
+	 // ----------------------------------------------------------------------------
+	 // Copyright (C) 2010-2014 Jay Salvat
+	 // http://jaysalvat.com/
+	 // ----------------------------------------------------------------------------
+
+	(function(context, factory) {
+	    if (typeof module !== "undefined" && module.exports) {
+	        module.exports = factory();
+	    } else if (true) {
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	    } else {
+	        context.buzz = factory();
+	    }
+	})(this, function() {
+	    var AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+	    var buzz = {
+	        audioCtx: AudioContextCtor ? new AudioContextCtor() : null,
+	        defaults: {
+	            autoplay: false,
+	            duration: 5e3,
+	            formats: [],
+	            loop: false,
+	            placeholder: "--",
+	            preload: "metadata",
+	            volume: 80,
+	            document: window.document
+	        },
+	        types: {
+	            mp3: "audio/mpeg",
+	            ogg: "audio/ogg",
+	            wav: "audio/wav",
+	            aac: "audio/aac",
+	            m4a: "audio/x-m4a"
+	        },
+	        sounds: [],
+	        el: document.createElement("audio"),
+	        sound: function(src, options) {
+	            options = options || {};
+	            var doc = options.document || buzz.defaults.document;
+	            var pid = 0, events = [], eventsOnce = {}, supported = buzz.isSupported();
+	            this.load = function() {
+	                if (!supported) {
+	                    return this;
+	                }
+	                this.sound.load();
+	                return this;
+	            };
+	            this.play = function() {
+	                if (!supported) {
+	                    return this;
+	                }
+	                this.sound.play();
+	                return this;
+	            };
+	            this.togglePlay = function() {
+	                if (!supported) {
+	                    return this;
+	                }
+	                if (this.sound.paused) {
+	                    this.sound.play();
+	                } else {
+	                    this.sound.pause();
+	                }
+	                return this;
+	            };
+	            this.pause = function() {
+	                if (!supported) {
+	                    return this;
+	                }
+	                this.sound.pause();
+	                return this;
+	            };
+	            this.isPaused = function() {
+	                if (!supported) {
+	                    return null;
+	                }
+	                return this.sound.paused;
+	            };
+	            this.stop = function() {
+	                if (!supported) {
+	                    return this;
+	                }
+	                this.setTime(0);
+	                this.sound.pause();
+	                return this;
+	            };
+	            this.isEnded = function() {
+	                if (!supported) {
+	                    return null;
+	                }
+	                return this.sound.ended;
+	            };
+	            this.loop = function() {
+	                if (!supported) {
+	                    return this;
+	                }
+	                this.sound.loop = "loop";
+	                this.bind("ended.buzzloop", function() {
+	                    this.currentTime = 0;
+	                    this.play();
+	                });
+	                return this;
+	            };
+	            this.unloop = function() {
+	                if (!supported) {
+	                    return this;
+	                }
+	                this.sound.removeAttribute("loop");
+	                this.unbind("ended.buzzloop");
+	                return this;
+	            };
+	            this.mute = function() {
+	                if (!supported) {
+	                    return this;
+	                }
+	                this.sound.muted = true;
+	                return this;
+	            };
+	            this.unmute = function() {
+	                if (!supported) {
+	                    return this;
+	                }
+	                this.sound.muted = false;
+	                return this;
+	            };
+	            this.toggleMute = function() {
+	                if (!supported) {
+	                    return this;
+	                }
+	                this.sound.muted = !this.sound.muted;
+	                return this;
+	            };
+	            this.isMuted = function() {
+	                if (!supported) {
+	                    return null;
+	                }
+	                return this.sound.muted;
+	            };
+	            this.setVolume = function(volume) {
+	                if (!supported) {
+	                    return this;
+	                }
+	                if (volume < 0) {
+	                    volume = 0;
+	                }
+	                if (volume > 100) {
+	                    volume = 100;
+	                }
+	                this.volume = volume;
+	                this.sound.volume = volume / 100;
+	                return this;
+	            };
+	            this.getVolume = function() {
+	                if (!supported) {
+	                    return this;
+	                }
+	                return this.volume;
+	            };
+	            this.increaseVolume = function(value) {
+	                return this.setVolume(this.volume + (value || 1));
+	            };
+	            this.decreaseVolume = function(value) {
+	                return this.setVolume(this.volume - (value || 1));
+	            };
+	            this.setTime = function(time) {
+	                if (!supported) {
+	                    return this;
+	                }
+	                var set = true;
+	                this.whenReady(function() {
+	                    if (set === true) {
+	                        set = false;
+	                        this.sound.currentTime = time;
+	                    }
+	                });
+	                return this;
+	            };
+	            this.getTime = function() {
+	                if (!supported) {
+	                    return null;
+	                }
+	                var time = Math.round(this.sound.currentTime * 100) / 100;
+	                return isNaN(time) ? buzz.defaults.placeholder : time;
+	            };
+	            this.setPercent = function(percent) {
+	                if (!supported) {
+	                    return this;
+	                }
+	                return this.setTime(buzz.fromPercent(percent, this.sound.duration));
+	            };
+	            this.getPercent = function() {
+	                if (!supported) {
+	                    return null;
+	                }
+	                var percent = Math.round(buzz.toPercent(this.sound.currentTime, this.sound.duration));
+	                return isNaN(percent) ? buzz.defaults.placeholder : percent;
+	            };
+	            this.setSpeed = function(duration) {
+	                if (!supported) {
+	                    return this;
+	                }
+	                this.sound.playbackRate = duration;
+	                return this;
+	            };
+	            this.getSpeed = function() {
+	                if (!supported) {
+	                    return null;
+	                }
+	                return this.sound.playbackRate;
+	            };
+	            this.getDuration = function() {
+	                if (!supported) {
+	                    return null;
+	                }
+	                var duration = Math.round(this.sound.duration * 100) / 100;
+	                return isNaN(duration) ? buzz.defaults.placeholder : duration;
+	            };
+	            this.getPlayed = function() {
+	                if (!supported) {
+	                    return null;
+	                }
+	                return timerangeToArray(this.sound.played);
+	            };
+	            this.getBuffered = function() {
+	                if (!supported) {
+	                    return null;
+	                }
+	                return timerangeToArray(this.sound.buffered);
+	            };
+	            this.getSeekable = function() {
+	                if (!supported) {
+	                    return null;
+	                }
+	                return timerangeToArray(this.sound.seekable);
+	            };
+	            this.getErrorCode = function() {
+	                if (supported && this.sound.error) {
+	                    return this.sound.error.code;
+	                }
+	                return 0;
+	            };
+	            this.getErrorMessage = function() {
+	                if (!supported) {
+	                    return null;
+	                }
+	                switch (this.getErrorCode()) {
+	                  case 1:
+	                    return "MEDIA_ERR_ABORTED";
+
+	                  case 2:
+	                    return "MEDIA_ERR_NETWORK";
+
+	                  case 3:
+	                    return "MEDIA_ERR_DECODE";
+
+	                  case 4:
+	                    return "MEDIA_ERR_SRC_NOT_SUPPORTED";
+
+	                  default:
+	                    return null;
+	                }
+	            };
+	            this.getStateCode = function() {
+	                if (!supported) {
+	                    return null;
+	                }
+	                return this.sound.readyState;
+	            };
+	            this.getStateMessage = function() {
+	                if (!supported) {
+	                    return null;
+	                }
+	                switch (this.getStateCode()) {
+	                  case 0:
+	                    return "HAVE_NOTHING";
+
+	                  case 1:
+	                    return "HAVE_METADATA";
+
+	                  case 2:
+	                    return "HAVE_CURRENT_DATA";
+
+	                  case 3:
+	                    return "HAVE_FUTURE_DATA";
+
+	                  case 4:
+	                    return "HAVE_ENOUGH_DATA";
+
+	                  default:
+	                    return null;
+	                }
+	            };
+	            this.getNetworkStateCode = function() {
+	                if (!supported) {
+	                    return null;
+	                }
+	                return this.sound.networkState;
+	            };
+	            this.getNetworkStateMessage = function() {
+	                if (!supported) {
+	                    return null;
+	                }
+	                switch (this.getNetworkStateCode()) {
+	                  case 0:
+	                    return "NETWORK_EMPTY";
+
+	                  case 1:
+	                    return "NETWORK_IDLE";
+
+	                  case 2:
+	                    return "NETWORK_LOADING";
+
+	                  case 3:
+	                    return "NETWORK_NO_SOURCE";
+
+	                  default:
+	                    return null;
+	                }
+	            };
+	            this.set = function(key, value) {
+	                if (!supported) {
+	                    return this;
+	                }
+	                this.sound[key] = value;
+	                return this;
+	            };
+	            this.get = function(key) {
+	                if (!supported) {
+	                    return null;
+	                }
+	                return key ? this.sound[key] : this.sound;
+	            };
+	            this.bind = function(types, func) {
+	                if (!supported) {
+	                    return this;
+	                }
+	                types = types.split(" ");
+	                var self = this, efunc = function(e) {
+	                    func.call(self, e);
+	                };
+	                for (var t = 0; t < types.length; t++) {
+	                    var type = types[t], idx = type;
+	                    type = idx.split(".")[0];
+	                    events.push({
+	                        idx: idx,
+	                        func: efunc
+	                    });
+	                    this.sound.addEventListener(type, efunc, true);
+	                }
+	                return this;
+	            };
+	            this.unbind = function(types) {
+	                if (!supported) {
+	                    return this;
+	                }
+	                types = types.split(" ");
+	                for (var t = 0; t < types.length; t++) {
+	                    var idx = types[t], type = idx.split(".")[0];
+	                    for (var i = 0; i < events.length; i++) {
+	                        var namespace = events[i].idx.split(".");
+	                        if (events[i].idx == idx || namespace[1] && namespace[1] == idx.replace(".", "")) {
+	                            this.sound.removeEventListener(type, events[i].func, true);
+	                            events.splice(i, 1);
+	                        }
+	                    }
+	                }
+	                return this;
+	            };
+	            this.bindOnce = function(type, func) {
+	                if (!supported) {
+	                    return this;
+	                }
+	                var self = this;
+	                eventsOnce[pid++] = false;
+	                this.bind(type + "." + pid, function() {
+	                    if (!eventsOnce[pid]) {
+	                        eventsOnce[pid] = true;
+	                        func.call(self);
+	                    }
+	                    self.unbind(type + "." + pid);
+	                });
+	                return this;
+	            };
+	            this.trigger = function(types) {
+	                if (!supported) {
+	                    return this;
+	                }
+	                types = types.split(" ");
+	                for (var t = 0; t < types.length; t++) {
+	                    var idx = types[t];
+	                    for (var i = 0; i < events.length; i++) {
+	                        var eventType = events[i].idx.split(".");
+	                        if (events[i].idx == idx || eventType[0] && eventType[0] == idx.replace(".", "")) {
+	                            var evt = doc.createEvent("HTMLEvents");
+	                            evt.initEvent(eventType[0], false, true);
+	                            this.sound.dispatchEvent(evt);
+	                        }
+	                    }
+	                }
+	                return this;
+	            };
+	            this.fadeTo = function(to, duration, callback) {
+	                if (!supported) {
+	                    return this;
+	                }
+	                if (duration instanceof Function) {
+	                    callback = duration;
+	                    duration = buzz.defaults.duration;
+	                } else {
+	                    duration = duration || buzz.defaults.duration;
+	                }
+	                var from = this.volume, delay = duration / Math.abs(from - to), self = this;
+	                this.play();
+	                function doFade() {
+	                    setTimeout(function() {
+	                        if (from < to && self.volume < to) {
+	                            self.setVolume(self.volume += 1);
+	                            doFade();
+	                        } else if (from > to && self.volume > to) {
+	                            self.setVolume(self.volume -= 1);
+	                            doFade();
+	                        } else if (callback instanceof Function) {
+	                            callback.apply(self);
+	                        }
+	                    }, delay);
+	                }
+	                this.whenReady(function() {
+	                    doFade();
+	                });
+	                return this;
+	            };
+	            this.fadeIn = function(duration, callback) {
+	                if (!supported) {
+	                    return this;
+	                }
+	                return this.setVolume(0).fadeTo(100, duration, callback);
+	            };
+	            this.fadeOut = function(duration, callback) {
+	                if (!supported) {
+	                    return this;
+	                }
+	                return this.fadeTo(0, duration, callback);
+	            };
+	            this.fadeWith = function(sound, duration) {
+	                if (!supported) {
+	                    return this;
+	                }
+	                this.fadeOut(duration, function() {
+	                    this.stop();
+	                });
+	                sound.play().fadeIn(duration);
+	                return this;
+	            };
+	            this.whenReady = function(func) {
+	                if (!supported) {
+	                    return null;
+	                }
+	                var self = this;
+	                if (this.sound.readyState === 0) {
+	                    this.bind("canplay.buzzwhenready", function() {
+	                        func.call(self);
+	                    });
+	                } else {
+	                    func.call(self);
+	                }
+	            };
+	            function timerangeToArray(timeRange) {
+	                var array = [], length = timeRange.length - 1;
+	                for (var i = 0; i <= length; i++) {
+	                    array.push({
+	                        start: timeRange.start(i),
+	                        end: timeRange.end(i)
+	                    });
+	                }
+	                return array;
+	            }
+	            function getExt(filename) {
+	                return filename.split(".").pop();
+	            }
+	            function addSource(sound, src) {
+	                var source = doc.createElement("source");
+	                source.src = src;
+	                if (buzz.types[getExt(src)]) {
+	                    source.type = buzz.types[getExt(src)];
+	                }
+	                sound.appendChild(source);
+	            }
+	            if (supported && src) {
+	                for (var i in buzz.defaults) {
+	                    if (buzz.defaults.hasOwnProperty(i)) {
+	                        if (options[i] === undefined) options[i] = buzz.defaults[i];
+	                    }
+	                }
+	                this.sound = doc.createElement("audio");
+	                if (buzz.audioCtx) {
+	                    this.source = buzz.audioCtx.createMediaElementSource(this.sound);
+	                    this.source.connect(buzz.audioCtx.destination);
+	                }
+	                if (src instanceof Array) {
+	                    for (var j in src) {
+	                        if (src.hasOwnProperty(j)) {
+	                            addSource(this.sound, src[j]);
+	                        }
+	                    }
+	                } else if (options.formats.length) {
+	                    for (var k in options.formats) {
+	                        if (options.formats.hasOwnProperty(k)) {
+	                            addSource(this.sound, src + "." + options.formats[k]);
+	                        }
+	                    }
+	                } else {
+	                    addSource(this.sound, src);
+	                }
+	                if (options.loop) {
+	                    this.loop();
+	                }
+	                if (options.autoplay) {
+	                    this.sound.autoplay = "autoplay";
+	                }
+	                if (options.preload === true) {
+	                    this.sound.preload = "auto";
+	                } else if (options.preload === false) {
+	                    this.sound.preload = "none";
+	                } else {
+	                    this.sound.preload = options.preload;
+	                }
+	                this.setVolume(options.volume);
+	                buzz.sounds.push(this);
+	            }
+	        },
+	        group: function(sounds) {
+	            sounds = argsToArray(sounds, arguments);
+	            this.getSounds = function() {
+	                return sounds;
+	            };
+	            this.add = function(soundArray) {
+	                soundArray = argsToArray(soundArray, arguments);
+	                for (var a = 0; a < soundArray.length; a++) {
+	                    sounds.push(soundArray[a]);
+	                }
+	            };
+	            this.remove = function(soundArray) {
+	                soundArray = argsToArray(soundArray, arguments);
+	                for (var a = 0; a < soundArray.length; a++) {
+	                    for (var i = 0; i < sounds.length; i++) {
+	                        if (sounds[i] == soundArray[a]) {
+	                            sounds.splice(i, 1);
+	                            break;
+	                        }
+	                    }
+	                }
+	            };
+	            this.load = function() {
+	                fn("load");
+	                return this;
+	            };
+	            this.play = function() {
+	                fn("play");
+	                return this;
+	            };
+	            this.togglePlay = function() {
+	                fn("togglePlay");
+	                return this;
+	            };
+	            this.pause = function(time) {
+	                fn("pause", time);
+	                return this;
+	            };
+	            this.stop = function() {
+	                fn("stop");
+	                return this;
+	            };
+	            this.mute = function() {
+	                fn("mute");
+	                return this;
+	            };
+	            this.unmute = function() {
+	                fn("unmute");
+	                return this;
+	            };
+	            this.toggleMute = function() {
+	                fn("toggleMute");
+	                return this;
+	            };
+	            this.setVolume = function(volume) {
+	                fn("setVolume", volume);
+	                return this;
+	            };
+	            this.increaseVolume = function(value) {
+	                fn("increaseVolume", value);
+	                return this;
+	            };
+	            this.decreaseVolume = function(value) {
+	                fn("decreaseVolume", value);
+	                return this;
+	            };
+	            this.loop = function() {
+	                fn("loop");
+	                return this;
+	            };
+	            this.unloop = function() {
+	                fn("unloop");
+	                return this;
+	            };
+	            this.setTime = function(time) {
+	                fn("setTime", time);
+	                return this;
+	            };
+	            this.set = function(key, value) {
+	                fn("set", key, value);
+	                return this;
+	            };
+	            this.bind = function(type, func) {
+	                fn("bind", type, func);
+	                return this;
+	            };
+	            this.unbind = function(type) {
+	                fn("unbind", type);
+	                return this;
+	            };
+	            this.bindOnce = function(type, func) {
+	                fn("bindOnce", type, func);
+	                return this;
+	            };
+	            this.trigger = function(type) {
+	                fn("trigger", type);
+	                return this;
+	            };
+	            this.fade = function(from, to, duration, callback) {
+	                fn("fade", from, to, duration, callback);
+	                return this;
+	            };
+	            this.fadeIn = function(duration, callback) {
+	                fn("fadeIn", duration, callback);
+	                return this;
+	            };
+	            this.fadeOut = function(duration, callback) {
+	                fn("fadeOut", duration, callback);
+	                return this;
+	            };
+	            function fn() {
+	                var args = argsToArray(null, arguments), func = args.shift();
+	                for (var i = 0; i < sounds.length; i++) {
+	                    sounds[i][func].apply(sounds[i], args);
+	                }
+	            }
+	            function argsToArray(array, args) {
+	                return array instanceof Array ? array : Array.prototype.slice.call(args);
+	            }
+	        },
+	        all: function() {
+	            return new buzz.group(buzz.sounds);
+	        },
+	        isSupported: function() {
+	            return !!buzz.el.canPlayType;
+	        },
+	        isOGGSupported: function() {
+	            return !!buzz.el.canPlayType && buzz.el.canPlayType('audio/ogg; codecs="vorbis"');
+	        },
+	        isWAVSupported: function() {
+	            return !!buzz.el.canPlayType && buzz.el.canPlayType('audio/wav; codecs="1"');
+	        },
+	        isMP3Supported: function() {
+	            return !!buzz.el.canPlayType && buzz.el.canPlayType("audio/mpeg;");
+	        },
+	        isAACSupported: function() {
+	            return !!buzz.el.canPlayType && (buzz.el.canPlayType("audio/x-m4a;") || buzz.el.canPlayType("audio/aac;"));
+	        },
+	        toTimer: function(time, withHours) {
+	            var h, m, s;
+	            h = Math.floor(time / 3600);
+	            h = isNaN(h) ? "--" : h >= 10 ? h : "0" + h;
+	            m = withHours ? Math.floor(time / 60 % 60) : Math.floor(time / 60);
+	            m = isNaN(m) ? "--" : m >= 10 ? m : "0" + m;
+	            s = Math.floor(time % 60);
+	            s = isNaN(s) ? "--" : s >= 10 ? s : "0" + s;
+	            return withHours ? h + ":" + m + ":" + s : m + ":" + s;
+	        },
+	        fromTimer: function(time) {
+	            var splits = time.toString().split(":");
+	            if (splits && splits.length == 3) {
+	                time = parseInt(splits[0], 10) * 3600 + parseInt(splits[1], 10) * 60 + parseInt(splits[2], 10);
+	            }
+	            if (splits && splits.length == 2) {
+	                time = parseInt(splits[0], 10) * 60 + parseInt(splits[1], 10);
+	            }
+	            return time;
+	        },
+	        toPercent: function(value, total, decimal) {
+	            var r = Math.pow(10, decimal || 0);
+	            return Math.round(value * 100 / total * r) / r;
+	        },
+	        fromPercent: function(percent, total, decimal) {
+	            var r = Math.pow(10, decimal || 0);
+	            return Math.round(total / 100 * percent * r) / r;
+	        }
+	    };
+	    return buzz;
+	});
+
+/***/ },
+/* 18 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -17561,7 +18267,7 @@
 	exports.default = Level;
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -17740,7 +18446,7 @@
 	exports.default = GameObject;
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -17838,7 +18544,7 @@
 	exports.default = singleton;
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -17880,7 +18586,7 @@
 	exports.default = Component;
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -17892,7 +18598,7 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _component = __webpack_require__(20);
+	var _component = __webpack_require__(21);
 
 	var _component2 = _interopRequireDefault(_component);
 
@@ -17931,7 +18637,7 @@
 	exports.default = Script;
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -17940,30 +18646,35 @@
 	    value: true
 	});
 
-	var _rotate = __webpack_require__(23);
+	var _rotate = __webpack_require__(24);
 
 	var _rotate2 = _interopRequireDefault(_rotate);
 
-	var _move = __webpack_require__(24);
+	var _move = __webpack_require__(25);
 
 	var _move2 = _interopRequireDefault(_move);
 
-	var _loopSound = __webpack_require__(167);
+	var _loopSound = __webpack_require__(26);
 
 	var _loopSound2 = _interopRequireDefault(_loopSound);
+
+	var _loopMusic = __webpack_require__(170);
+
+	var _loopMusic2 = _interopRequireDefault(_loopMusic);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var index = {
 	    ROTATE: _rotate2.default,
 	    MOVE: _move2.default,
-	    LOOP_SOUND: _loopSound2.default
+	    LOOP_SOUND: _loopSound2.default,
+	    LOOP_MUSIC: _loopMusic2.default
 	};
 
 	exports.default = index;
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -17974,7 +18685,7 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _script = __webpack_require__(21);
+	var _script = __webpack_require__(22);
 
 	var _script2 = _interopRequireDefault(_script);
 
@@ -18013,7 +18724,7 @@
 	exports.default = Rotate;
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18024,7 +18735,7 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _script = __webpack_require__(21);
+	var _script = __webpack_require__(22);
 
 	var _script2 = _interopRequireDefault(_script);
 
@@ -18065,7 +18776,7 @@
 	exports.default = Move;
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18076,11 +18787,68 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _pixi = __webpack_require__(26);
+	var _script = __webpack_require__(22);
+
+	var _script2 = _interopRequireDefault(_script);
+
+	var _sounds = __webpack_require__(16);
+
+	var _sounds2 = _interopRequireDefault(_sounds);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var LoopSound = function (_Script) {
+	    _inherits(LoopSound, _Script);
+
+	    function LoopSound(params) {
+	        _classCallCheck(this, LoopSound);
+
+	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(LoopSound).call(this));
+
+	        _this.params = params;
+	        return _this;
+	    }
+
+	    _createClass(LoopSound, [{
+	        key: 'start',
+	        value: function start() {
+	            var sound = _sounds2.default.getSound(this.params.name);
+	            if (sound) {
+	                setInterval(function () {
+	                    sound.play();
+	                }, this.params.interval);
+	            }
+	        }
+	    }]);
+
+	    return LoopSound;
+	}(_script2.default);
+
+	exports.default = LoopSound;
+
+/***/ },
+/* 27 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _pixi = __webpack_require__(28);
 
 	var _pixi2 = _interopRequireDefault(_pixi);
 
-	var _pixiSprite = __webpack_require__(161);
+	var _pixiSprite = __webpack_require__(163);
 
 	var _pixiSprite2 = _interopRequireDefault(_pixiSprite);
 
@@ -18137,21 +18905,21 @@
 	exports.default = PIXIRenderer;
 
 /***/ },
-/* 26 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {// run the polyfills
-	__webpack_require__(27);
+	__webpack_require__(29);
 
-	var core = module.exports = __webpack_require__(32);
+	var core = module.exports = __webpack_require__(34);
 
 	// add core plugins.
-	core.extras         = __webpack_require__(94);
-	core.filters        = __webpack_require__(101);
-	core.interaction    = __webpack_require__(129);
-	core.loaders        = __webpack_require__(133);
-	core.mesh           = __webpack_require__(151);
-	core.accessibility  = __webpack_require__(157);
+	core.extras         = __webpack_require__(96);
+	core.filters        = __webpack_require__(103);
+	core.interaction    = __webpack_require__(131);
+	core.loaders        = __webpack_require__(135);
+	core.mesh           = __webpack_require__(153);
+	core.accessibility  = __webpack_require__(159);
 
 	// export a premade loader instance
 	/**
@@ -18164,7 +18932,7 @@
 	core.loader = new core.loaders.Loader();
 
 	// mixin the deprecation features.
-	Object.assign(core, __webpack_require__(160));
+	Object.assign(core, __webpack_require__(162));
 
 	// Always export pixi globally.
 	global.PIXI = core;
@@ -18172,16 +18940,16 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 27 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(28);
 	__webpack_require__(30);
-	__webpack_require__(31);
+	__webpack_require__(32);
+	__webpack_require__(33);
 
 
 /***/ },
-/* 28 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// References:
@@ -18190,12 +18958,12 @@
 
 	if (!Object.assign)
 	{
-	    Object.assign = __webpack_require__(29);
+	    Object.assign = __webpack_require__(31);
 	}
 
 
 /***/ },
-/* 29 */
+/* 31 */
 /***/ function(module, exports) {
 
 	/* eslint-disable no-unused-vars */
@@ -18240,7 +19008,7 @@
 
 
 /***/ },
-/* 30 */
+/* 32 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {// References:
@@ -18313,7 +19081,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 31 */
+/* 33 */
 /***/ function(module, exports) {
 
 	// References:
@@ -18333,7 +19101,7 @@
 
 
 /***/ },
-/* 32 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -18347,56 +19115,56 @@
 	 * @namespace PIXI
 	 */
 	// export core and const. We assign core to const so that the non-reference types in const remain in-tact
-	var core = module.exports = Object.assign(__webpack_require__(33), __webpack_require__(34), {
+	var core = module.exports = Object.assign(__webpack_require__(35), __webpack_require__(36), {
 	    // utils
-	    utils: __webpack_require__(43),
-	    ticker: __webpack_require__(49),
+	    utils: __webpack_require__(45),
+	    ticker: __webpack_require__(51),
 
 	    // display
-	    DisplayObject:          __webpack_require__(51),
-	    Container:              __webpack_require__(63),
+	    DisplayObject:          __webpack_require__(53),
+	    Container:              __webpack_require__(65),
 
 	    // sprites
-	    Sprite:                 __webpack_require__(64),
-	    ParticleContainer:      __webpack_require__(66),
-	    SpriteRenderer:         __webpack_require__(67),
-	    ParticleRenderer:       __webpack_require__(82),
+	    Sprite:                 __webpack_require__(66),
+	    ParticleContainer:      __webpack_require__(68),
+	    SpriteRenderer:         __webpack_require__(69),
+	    ParticleRenderer:       __webpack_require__(84),
 
 	    // text
-	    Text:                   __webpack_require__(85),
+	    Text:                   __webpack_require__(87),
 
 	    // primitives
-	    Graphics:               __webpack_require__(86),
-	    GraphicsData:           __webpack_require__(88),
-	    GraphicsRenderer:       __webpack_require__(89),
+	    Graphics:               __webpack_require__(88),
+	    GraphicsData:           __webpack_require__(90),
+	    GraphicsRenderer:       __webpack_require__(91),
 
 	    // textures
-	    Texture:                __webpack_require__(54),
-	    BaseTexture:            __webpack_require__(53),
-	    RenderTexture:          __webpack_require__(52),
-	    VideoBaseTexture:       __webpack_require__(55),
-	    TextureUvs:             __webpack_require__(56),
+	    Texture:                __webpack_require__(56),
+	    BaseTexture:            __webpack_require__(55),
+	    RenderTexture:          __webpack_require__(54),
+	    VideoBaseTexture:       __webpack_require__(57),
+	    TextureUvs:             __webpack_require__(58),
 
 	    // renderers - canvas
-	    CanvasRenderer:         __webpack_require__(92),
-	    CanvasGraphics:         __webpack_require__(87),
-	    CanvasBuffer:           __webpack_require__(62),
+	    CanvasRenderer:         __webpack_require__(94),
+	    CanvasGraphics:         __webpack_require__(89),
+	    CanvasBuffer:           __webpack_require__(64),
 
 	    // renderers - webgl
-	    WebGLRenderer:          __webpack_require__(69),
-	    WebGLManager:           __webpack_require__(60),
-	    ShaderManager:          __webpack_require__(71),
-	    Shader:                 __webpack_require__(73),
-	    TextureShader:          __webpack_require__(72),
-	    PrimitiveShader:        __webpack_require__(75),
-	    ComplexPrimitiveShader: __webpack_require__(74),
-	    ObjectRenderer:         __webpack_require__(68),
-	    RenderTarget:           __webpack_require__(57),
+	    WebGLRenderer:          __webpack_require__(71),
+	    WebGLManager:           __webpack_require__(62),
+	    ShaderManager:          __webpack_require__(73),
+	    Shader:                 __webpack_require__(75),
+	    TextureShader:          __webpack_require__(74),
+	    PrimitiveShader:        __webpack_require__(77),
+	    ComplexPrimitiveShader: __webpack_require__(76),
+	    ObjectRenderer:         __webpack_require__(70),
+	    RenderTarget:           __webpack_require__(59),
 
 	    // filters - webgl
-	    AbstractFilter:         __webpack_require__(78),
-	    FXAAFilter:             __webpack_require__(81),
-	    SpriteMaskFilter:       __webpack_require__(77),
+	    AbstractFilter:         __webpack_require__(80),
+	    FXAAFilter:             __webpack_require__(83),
+	    SpriteMaskFilter:       __webpack_require__(79),
 
 	    /**
 	     * This helper function will automatically detect which renderer you should be using.
@@ -18433,7 +19201,7 @@
 
 
 /***/ },
-/* 33 */
+/* 35 */
 /***/ function(module, exports) {
 
 	/**
@@ -18660,7 +19428,7 @@
 
 
 /***/ },
-/* 34 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -18674,20 +19442,20 @@
 	    // to avoid circular dependencies and cut down on
 	    // internal module requires.
 
-	    Point:      __webpack_require__(35),
-	    Matrix:     __webpack_require__(36),
-	    GroupD8:    __webpack_require__(37),
+	    Point:      __webpack_require__(37),
+	    Matrix:     __webpack_require__(38),
+	    GroupD8:    __webpack_require__(39),
 
-	    Circle:     __webpack_require__(38),
-	    Ellipse:    __webpack_require__(40),
-	    Polygon:    __webpack_require__(41),
-	    Rectangle:  __webpack_require__(39),
-	    RoundedRectangle: __webpack_require__(42)
+	    Circle:     __webpack_require__(40),
+	    Ellipse:    __webpack_require__(42),
+	    Polygon:    __webpack_require__(43),
+	    Rectangle:  __webpack_require__(41),
+	    RoundedRectangle: __webpack_require__(44)
 	};
 
 
 /***/ },
-/* 35 */
+/* 37 */
 /***/ function(module, exports) {
 
 	/**
@@ -18761,14 +19529,14 @@
 
 
 /***/ },
-/* 36 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// @todo - ignore the too many parameters warning for now
 	// should either fix it or change the jshint config
 	// jshint -W072
 
-	var Point = __webpack_require__(35);
+	var Point = __webpack_require__(37);
 
 	/**
 	 * The pixi Matrix class as an object, which makes it a lot faster,
@@ -19205,7 +19973,7 @@
 
 
 /***/ },
-/* 37 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Your friendly neighbour https://en.wikipedia.org/wiki/Dihedral_group of order 16
@@ -19215,7 +19983,7 @@
 	var vx = [0, -1, -1, -1, 0, 1, 1, 1, 0, 1, 1, 1, 0, -1, -1, -1];
 	var vy = [1, 1, 0, -1, -1, -1, 0, 1, -1, -1, 0, 1, 1, 1, 0, -1];
 	var tempMatrices = [];
-	var Matrix = __webpack_require__(36);
+	var Matrix = __webpack_require__(38);
 
 	var mul = [];
 
@@ -19373,11 +20141,11 @@
 
 
 /***/ },
-/* 38 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Rectangle = __webpack_require__(39),
-	    CONST = __webpack_require__(33);
+	var Rectangle = __webpack_require__(41),
+	    CONST = __webpack_require__(35);
 
 	/**
 	 * The Circle object can be used to specify a hit area for displayObjects
@@ -19465,10 +20233,10 @@
 
 
 /***/ },
-/* 39 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var CONST = __webpack_require__(33);
+	var CONST = __webpack_require__(35);
 
 	/**
 	 * the Rectangle object is an area defined by its position, as indicated by its top-left corner point (x, y) and by its width and its height.
@@ -19563,11 +20331,11 @@
 
 
 /***/ },
-/* 40 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Rectangle = __webpack_require__(39),
-	    CONST = __webpack_require__(33);
+	var Rectangle = __webpack_require__(41),
+	    CONST = __webpack_require__(35);
 
 	/**
 	 * The Ellipse object can be used to specify a hit area for displayObjects
@@ -19662,11 +20430,11 @@
 
 
 /***/ },
-/* 41 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Point = __webpack_require__(35),
-	    CONST = __webpack_require__(33);
+	var Point = __webpack_require__(37),
+	    CONST = __webpack_require__(35);
 
 	/**
 	 * @class
@@ -19769,10 +20537,10 @@
 
 
 /***/ },
-/* 42 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var CONST = __webpack_require__(33);
+	var CONST = __webpack_require__(35);
 
 	/**
 	 * The Rounded Rectangle object is an area that has nice rounded corners, as indicated by its top-left corner point (x, y) and by its width and its height and its radius.
@@ -19865,10 +20633,10 @@
 
 
 /***/ },
-/* 43 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var CONST = __webpack_require__(33);
+	var CONST = __webpack_require__(35);
 
 	/**
 	 * @namespace PIXI.utils
@@ -19877,9 +20645,9 @@
 	    _uid: 0,
 	    _saidHello: false,
 
-	    EventEmitter:   __webpack_require__(44),
-	    pluginTarget:   __webpack_require__(45),
-	    async:          __webpack_require__(46),
+	    EventEmitter:   __webpack_require__(46),
+	    pluginTarget:   __webpack_require__(47),
+	    async:          __webpack_require__(48),
 
 	    /**
 	     * Gets the next unique identifier
@@ -20146,7 +20914,7 @@
 
 
 /***/ },
-/* 44 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20441,7 +21209,7 @@
 
 
 /***/ },
-/* 45 */
+/* 47 */
 /***/ function(module, exports) {
 
 	/**
@@ -20515,7 +21283,7 @@
 
 
 /***/ },
-/* 46 */
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global, setImmediate, process) {/*!
@@ -21784,13 +22552,13 @@
 
 	}());
 
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(47).setImmediate, __webpack_require__(48)))
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(49).setImmediate, __webpack_require__(50)))
 
 /***/ },
-/* 47 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(setImmediate, clearImmediate) {var nextTick = __webpack_require__(48).nextTick;
+	/* WEBPACK VAR INJECTION */(function(setImmediate, clearImmediate) {var nextTick = __webpack_require__(50).nextTick;
 	var apply = Function.prototype.apply;
 	var slice = Array.prototype.slice;
 	var immediateIds = {};
@@ -21866,10 +22634,10 @@
 	exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate : function(id) {
 	  delete immediateIds[id];
 	};
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(47).setImmediate, __webpack_require__(47).clearImmediate))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(49).setImmediate, __webpack_require__(49).clearImmediate))
 
 /***/ },
-/* 48 */
+/* 50 */
 /***/ function(module, exports) {
 
 	// shim for using process in browser
@@ -21966,10 +22734,10 @@
 
 
 /***/ },
-/* 49 */
+/* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Ticker = __webpack_require__(50);
+	var Ticker = __webpack_require__(52);
 
 	/**
 	 * The shared ticker instance used by {@link PIXI.extras.MovieClip}.
@@ -22026,11 +22794,11 @@
 
 
 /***/ },
-/* 50 */
+/* 52 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var CONST = __webpack_require__(33),
-	    EventEmitter = __webpack_require__(44),
+	var CONST = __webpack_require__(35),
+	    EventEmitter = __webpack_require__(46),
 	    // Internal event used by composed emitter
 	    TICK = 'tick';
 
@@ -22385,13 +23153,13 @@
 
 
 /***/ },
-/* 51 */
+/* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var math = __webpack_require__(34),
-	    RenderTexture = __webpack_require__(52),
-	    EventEmitter = __webpack_require__(44),
-	    CONST = __webpack_require__(33),
+	var math = __webpack_require__(36),
+	    RenderTexture = __webpack_require__(54),
+	    EventEmitter = __webpack_require__(46),
+	    CONST = __webpack_require__(35),
 	    _tempMatrix = new math.Matrix(),
 	    _tempDisplayObjectParent = {worldTransform:new math.Matrix(), worldAlpha:1, children:[]};
 
@@ -22955,16 +23723,16 @@
 
 
 /***/ },
-/* 52 */
+/* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var BaseTexture = __webpack_require__(53),
-	    Texture = __webpack_require__(54),
-	    RenderTarget = __webpack_require__(57),
-	    FilterManager = __webpack_require__(59),
-	    CanvasBuffer = __webpack_require__(62),
-	    math = __webpack_require__(34),
-	    CONST = __webpack_require__(33),
+	var BaseTexture = __webpack_require__(55),
+	    Texture = __webpack_require__(56),
+	    RenderTarget = __webpack_require__(59),
+	    FilterManager = __webpack_require__(61),
+	    CanvasBuffer = __webpack_require__(64),
+	    math = __webpack_require__(36),
+	    CONST = __webpack_require__(35),
 	    tempMatrix = new math.Matrix();
 
 	/**
@@ -23438,12 +24206,12 @@
 
 
 /***/ },
-/* 53 */
+/* 55 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var utils = __webpack_require__(43),
-	    CONST = __webpack_require__(33),
-	    EventEmitter = __webpack_require__(44);
+	var utils = __webpack_require__(45),
+	    CONST = __webpack_require__(35),
+	    EventEmitter = __webpack_require__(46);
 
 	/**
 	 * A texture stores the information that represents an image. All textures have a base texture.
@@ -23878,15 +24646,15 @@
 
 
 /***/ },
-/* 54 */
+/* 56 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var BaseTexture = __webpack_require__(53),
-	    VideoBaseTexture = __webpack_require__(55),
-	    TextureUvs = __webpack_require__(56),
-	    EventEmitter = __webpack_require__(44),
-	    math = __webpack_require__(34),
-	    utils = __webpack_require__(43);
+	var BaseTexture = __webpack_require__(55),
+	    VideoBaseTexture = __webpack_require__(57),
+	    TextureUvs = __webpack_require__(58),
+	    EventEmitter = __webpack_require__(46),
+	    math = __webpack_require__(36),
+	    utils = __webpack_require__(45);
 
 	/**
 	 * A texture stores the information that represents an image or part of an image. It cannot be added
@@ -24334,11 +25102,11 @@
 
 
 /***/ },
-/* 55 */
+/* 57 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var BaseTexture = __webpack_require__(53),
-	    utils = __webpack_require__(43);
+	var BaseTexture = __webpack_require__(55),
+	    utils = __webpack_require__(45);
 
 	/**
 	 * A texture of a [playing] Video.
@@ -24575,7 +25343,7 @@
 
 
 /***/ },
-/* 56 */
+/* 58 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -24603,7 +25371,7 @@
 
 	module.exports = TextureUvs;
 
-	var GroupD8 = __webpack_require__(37);
+	var GroupD8 = __webpack_require__(39);
 
 	/**
 	 * Sets the texture Uvs based on the given frame information
@@ -24658,14 +25426,14 @@
 
 
 /***/ },
-/* 57 */
+/* 59 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var math = __webpack_require__(34),
-	    utils = __webpack_require__(43),
-	    CONST = __webpack_require__(33),
+	var math = __webpack_require__(36),
+	    utils = __webpack_require__(45),
+	    CONST = __webpack_require__(35),
 	    //StencilManager = require('../managers/StencilManager'),
-	    StencilMaskStack = __webpack_require__(58);
+	    StencilMaskStack = __webpack_require__(60);
 
 	/**
 	 * @author Mat Groves http://matgroves.com/ @Doormat23
@@ -24984,7 +25752,7 @@
 
 
 /***/ },
-/* 58 */
+/* 60 */
 /***/ function(module, exports) {
 
 	/**
@@ -25021,14 +25789,14 @@
 
 
 /***/ },
-/* 59 */
+/* 61 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var WebGLManager = __webpack_require__(60),
-	    RenderTarget = __webpack_require__(57),
-	    CONST = __webpack_require__(33),
-	    Quad = __webpack_require__(61),
-	    math =  __webpack_require__(34);
+	var WebGLManager = __webpack_require__(62),
+	    RenderTarget = __webpack_require__(59),
+	    CONST = __webpack_require__(35),
+	    Quad = __webpack_require__(63),
+	    math =  __webpack_require__(36);
 
 	/**
 	 * @class
@@ -25477,7 +26245,7 @@
 
 
 /***/ },
-/* 60 */
+/* 62 */
 /***/ function(module, exports) {
 
 	/**
@@ -25522,7 +26290,7 @@
 
 
 /***/ },
-/* 61 */
+/* 63 */
 /***/ function(module, exports) {
 
 	/**
@@ -25681,7 +26449,7 @@
 
 
 /***/ },
-/* 62 */
+/* 64 */
 /***/ function(module, exports) {
 
 	/**
@@ -25785,13 +26553,13 @@
 
 
 /***/ },
-/* 63 */
+/* 65 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var math = __webpack_require__(34),
-	    utils = __webpack_require__(43),
-	    DisplayObject = __webpack_require__(51),
-	    RenderTexture = __webpack_require__(52),
+	var math = __webpack_require__(36),
+	    utils = __webpack_require__(45),
+	    DisplayObject = __webpack_require__(53),
+	    RenderTexture = __webpack_require__(54),
 	    _tempMatrix = new math.Matrix();
 
 	/**
@@ -26433,15 +27201,15 @@
 
 
 /***/ },
-/* 64 */
+/* 66 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var math = __webpack_require__(34),
-	    Texture = __webpack_require__(54),
-	    Container = __webpack_require__(63),
-	    CanvasTinter = __webpack_require__(65),
-	    utils = __webpack_require__(43),
-	    CONST = __webpack_require__(33),
+	var math = __webpack_require__(36),
+	    Texture = __webpack_require__(56),
+	    Container = __webpack_require__(65),
+	    CanvasTinter = __webpack_require__(67),
+	    utils = __webpack_require__(45),
+	    CONST = __webpack_require__(35),
 	    tempPoint = new math.Point(),
 	    GroupD8 = math.GroupD8,
 	    canvasRenderWorldTransform = new math.Matrix();
@@ -27005,10 +27773,10 @@
 
 
 /***/ },
-/* 65 */
+/* 67 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var utils = __webpack_require__(43);
+	var utils = __webpack_require__(45);
 
 	/**
 	 * Utility methods for Sprite/Texture tinting.
@@ -27261,11 +28029,11 @@
 
 
 /***/ },
-/* 66 */
+/* 68 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Container = __webpack_require__(63),
-	    CONST = __webpack_require__(33);
+	var Container = __webpack_require__(65),
+	    CONST = __webpack_require__(35);
 
 	/**
 	 * The ParticleContainer class is a really fast version of the Container built solely for speed,
@@ -27584,12 +28352,12 @@
 
 
 /***/ },
-/* 67 */
+/* 69 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var ObjectRenderer = __webpack_require__(68),
-	    WebGLRenderer = __webpack_require__(69),
-	    CONST = __webpack_require__(33);
+	var ObjectRenderer = __webpack_require__(70),
+	    WebGLRenderer = __webpack_require__(71),
+	    CONST = __webpack_require__(35);
 
 	/**
 	 * @author Mat Groves
@@ -28061,10 +28829,10 @@
 
 
 /***/ },
-/* 68 */
+/* 70 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var WebGLManager = __webpack_require__(60);
+	var WebGLManager = __webpack_require__(62);
 
 	/**
 	 * Base for a common object renderer that can be used as a system renderer plugin.
@@ -28123,20 +28891,20 @@
 
 
 /***/ },
-/* 69 */
+/* 71 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var SystemRenderer = __webpack_require__(70),
-	    ShaderManager = __webpack_require__(71),
-	    MaskManager = __webpack_require__(76),
-	    StencilManager = __webpack_require__(79),
-	    FilterManager = __webpack_require__(59),
-	    BlendModeManager = __webpack_require__(80),
-	    RenderTarget = __webpack_require__(57),
-	    ObjectRenderer = __webpack_require__(68),
-	    FXAAFilter = __webpack_require__(81),
-	    utils = __webpack_require__(43),
-	    CONST = __webpack_require__(33);
+	var SystemRenderer = __webpack_require__(72),
+	    ShaderManager = __webpack_require__(73),
+	    MaskManager = __webpack_require__(78),
+	    StencilManager = __webpack_require__(81),
+	    FilterManager = __webpack_require__(61),
+	    BlendModeManager = __webpack_require__(82),
+	    RenderTarget = __webpack_require__(59),
+	    ObjectRenderer = __webpack_require__(70),
+	    FXAAFilter = __webpack_require__(83),
+	    utils = __webpack_require__(45),
+	    CONST = __webpack_require__(35);
 
 	/**
 	 * The WebGLRenderer draws the scene and all its content onto a webGL enabled canvas. This renderer
@@ -28717,13 +29485,13 @@
 
 
 /***/ },
-/* 70 */
+/* 72 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var utils = __webpack_require__(43),
-	    math = __webpack_require__(34),
-	    CONST = __webpack_require__(33),
-	    EventEmitter = __webpack_require__(44);
+	var utils = __webpack_require__(45),
+	    math = __webpack_require__(36),
+	    CONST = __webpack_require__(35),
+	    EventEmitter = __webpack_require__(46);
 
 	/**
 	 * The CanvasRenderer draws the scene and all its content onto a 2d canvas. This renderer should be used for browsers that do not support webGL.
@@ -28982,14 +29750,14 @@
 
 
 /***/ },
-/* 71 */
+/* 73 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var WebGLManager = __webpack_require__(60),
-	    TextureShader = __webpack_require__(72),
-	    ComplexPrimitiveShader = __webpack_require__(74),
-	    PrimitiveShader = __webpack_require__(75),
-	    utils = __webpack_require__(43);
+	var WebGLManager = __webpack_require__(62),
+	    TextureShader = __webpack_require__(74),
+	    ComplexPrimitiveShader = __webpack_require__(76),
+	    PrimitiveShader = __webpack_require__(77),
+	    utils = __webpack_require__(45);
 
 	/**
 	 * @class
@@ -29155,10 +29923,10 @@
 
 
 /***/ },
-/* 72 */
+/* 74 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Shader = __webpack_require__(73);
+	var Shader = __webpack_require__(75);
 
 	/**
 	 * @class
@@ -29270,11 +30038,11 @@
 
 
 /***/ },
-/* 73 */
+/* 75 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*global console */
-	var utils = __webpack_require__(43);
+	var utils = __webpack_require__(45);
 
 	/**
 	 * Base shader class for PIXI managed shaders.
@@ -29838,10 +30606,10 @@
 
 
 /***/ },
-/* 74 */
+/* 76 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Shader = __webpack_require__(73);
+	var Shader = __webpack_require__(75);
 
 	/**
 	 * This shader is used to draw complex primitive shapes for {@link PIXI.Graphics}.
@@ -29904,10 +30672,10 @@
 
 
 /***/ },
-/* 75 */
+/* 77 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Shader = __webpack_require__(73);
+	var Shader = __webpack_require__(75);
 
 	/**
 	 * This shader is used to draw simple primitive shapes for {@link PIXI.Graphics}.
@@ -29971,11 +30739,11 @@
 
 
 /***/ },
-/* 76 */
+/* 78 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var WebGLManager = __webpack_require__(60),
-	    AlphaMaskFilter = __webpack_require__(77);
+	var WebGLManager = __webpack_require__(62),
+	    AlphaMaskFilter = __webpack_require__(79);
 
 	/**
 	 * @class
@@ -30090,11 +30858,11 @@
 
 
 /***/ },
-/* 77 */
+/* 79 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var AbstractFilter = __webpack_require__(78),
-	    math =  __webpack_require__(34);
+	var AbstractFilter = __webpack_require__(80),
+	    math =  __webpack_require__(36);
 
 	// @see https://github.com/substack/brfs/issues/25
 
@@ -30191,10 +30959,10 @@
 
 
 /***/ },
-/* 78 */
+/* 80 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var DefaultShader = __webpack_require__(72);
+	var DefaultShader = __webpack_require__(74);
 
 	/**
 	 * This is the base class for creating a PIXI filter. Currently only WebGL supports filters.
@@ -30307,11 +31075,11 @@
 
 
 /***/ },
-/* 79 */
+/* 81 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var WebGLManager = __webpack_require__(60),
-	    utils = __webpack_require__(43);
+	var WebGLManager = __webpack_require__(62),
+	    utils = __webpack_require__(45);
 
 	/**
 	 * @class
@@ -30657,10 +31425,10 @@
 
 
 /***/ },
-/* 80 */
+/* 82 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var WebGLManager = __webpack_require__(60);
+	var WebGLManager = __webpack_require__(62);
 
 	/**
 	 * @class
@@ -30705,10 +31473,10 @@
 
 
 /***/ },
-/* 81 */
+/* 83 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var AbstractFilter = __webpack_require__(78);
+	var AbstractFilter = __webpack_require__(80);
 	// @see https://github.com/substack/brfs/issues/25
 
 
@@ -30764,14 +31532,14 @@
 
 
 /***/ },
-/* 82 */
+/* 84 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var ObjectRenderer = __webpack_require__(68),
-	    WebGLRenderer = __webpack_require__(69),
-	    ParticleShader = __webpack_require__(83),
-	    ParticleBuffer = __webpack_require__(84),
-	    math            = __webpack_require__(34);
+	var ObjectRenderer = __webpack_require__(70),
+	    WebGLRenderer = __webpack_require__(71),
+	    ParticleShader = __webpack_require__(85),
+	    ParticleBuffer = __webpack_require__(86),
+	    math            = __webpack_require__(36);
 
 	/**
 	 * @author Mat Groves
@@ -31244,10 +32012,10 @@
 
 
 /***/ },
-/* 83 */
+/* 85 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var TextureShader = __webpack_require__(72);
+	var TextureShader = __webpack_require__(74);
 
 	/**
 	 * @class
@@ -31326,7 +32094,7 @@
 
 
 /***/ },
-/* 84 */
+/* 86 */
 /***/ function(module, exports) {
 
 	
@@ -31550,14 +32318,14 @@
 
 
 /***/ },
-/* 85 */
+/* 87 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Sprite = __webpack_require__(64),
-	    Texture = __webpack_require__(54),
-	    math = __webpack_require__(34),
-	    utils = __webpack_require__(43),
-	    CONST = __webpack_require__(33);
+	var Sprite = __webpack_require__(66),
+	    Texture = __webpack_require__(56),
+	    math = __webpack_require__(36),
+	    utils = __webpack_require__(45),
+	    CONST = __webpack_require__(35);
 
 	/**
 	 * A Text Object will create a line or multiple lines of text. To split a line you can use '\n' in your text string,
@@ -32251,16 +33019,16 @@
 
 
 /***/ },
-/* 86 */
+/* 88 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Container = __webpack_require__(63),
-	    Texture = __webpack_require__(54),
-	    CanvasBuffer = __webpack_require__(62),
-	    CanvasGraphics = __webpack_require__(87),
-	    GraphicsData = __webpack_require__(88),
-	    math = __webpack_require__(34),
-	    CONST = __webpack_require__(33),
+	var Container = __webpack_require__(65),
+	    Texture = __webpack_require__(56),
+	    CanvasBuffer = __webpack_require__(64),
+	    CanvasGraphics = __webpack_require__(89),
+	    GraphicsData = __webpack_require__(90),
+	    math = __webpack_require__(36),
+	    CONST = __webpack_require__(35),
 	    tempPoint = new math.Point();
 
 	/**
@@ -33440,10 +34208,10 @@
 
 
 /***/ },
-/* 87 */
+/* 89 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var CONST = __webpack_require__(33);
+	var CONST = __webpack_require__(35);
 
 	/**
 	 * A set of functions used by the canvas renderer to draw the primitive graphics data.
@@ -33798,7 +34566,7 @@
 
 
 /***/ },
-/* 88 */
+/* 90 */
 /***/ function(module, exports) {
 
 	/**
@@ -33895,16 +34663,16 @@
 
 
 /***/ },
-/* 89 */
+/* 91 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var utils = __webpack_require__(43),
-	    math = __webpack_require__(34),
-	    CONST = __webpack_require__(33),
-	    ObjectRenderer = __webpack_require__(68),
-	    WebGLRenderer = __webpack_require__(69),
-	    WebGLGraphicsData = __webpack_require__(90),
-	    earcut = __webpack_require__(91);
+	var utils = __webpack_require__(45),
+	    math = __webpack_require__(36),
+	    CONST = __webpack_require__(35),
+	    ObjectRenderer = __webpack_require__(70),
+	    WebGLRenderer = __webpack_require__(71),
+	    WebGLGraphicsData = __webpack_require__(92),
+	    earcut = __webpack_require__(93);
 
 	/**
 	 * Renders the graphics object.
@@ -34804,7 +35572,7 @@
 
 
 /***/ },
-/* 90 */
+/* 92 */
 /***/ function(module, exports) {
 
 	/**
@@ -34926,7 +35694,7 @@
 
 
 /***/ },
-/* 91 */
+/* 93 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -35576,14 +36344,14 @@
 
 
 /***/ },
-/* 92 */
+/* 94 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var SystemRenderer = __webpack_require__(70),
-	    CanvasMaskManager = __webpack_require__(93),
-	    utils = __webpack_require__(43),
-	    math = __webpack_require__(34),
-	    CONST = __webpack_require__(33);
+	var SystemRenderer = __webpack_require__(72),
+	    CanvasMaskManager = __webpack_require__(95),
+	    utils = __webpack_require__(45),
+	    math = __webpack_require__(36),
+	    CONST = __webpack_require__(35);
 
 	/**
 	 * The CanvasRenderer draws the scene and all its content onto a 2d canvas. This renderer should be used for browsers that do not support webGL.
@@ -35848,10 +36616,10 @@
 
 
 /***/ },
-/* 93 */
+/* 95 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var CanvasGraphics = __webpack_require__(87);
+	var CanvasGraphics = __webpack_require__(89);
 
 	/**
 	 * A set of functions used to handle masking.
@@ -35914,7 +36682,7 @@
 
 
 /***/ },
-/* 94 */
+/* 96 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -35924,25 +36692,25 @@
 	 * @license     {@link https://github.com/pixijs/pixi.js/blob/master/LICENSE|MIT License}
 	 */
 
-	__webpack_require__(95);
-	__webpack_require__(96);
 	__webpack_require__(97);
+	__webpack_require__(98);
+	__webpack_require__(99);
 
 	/**
 	 * @namespace PIXI.extras
 	 */
 	module.exports = {
-	    MovieClip:      __webpack_require__(98),
-	    TilingSprite:   __webpack_require__(99),
-	    BitmapText:     __webpack_require__(100)
+	    MovieClip:      __webpack_require__(100),
+	    TilingSprite:   __webpack_require__(101),
+	    BitmapText:     __webpack_require__(102)
 	};
 
 
 /***/ },
-/* 95 */
+/* 97 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32),
+	var core = __webpack_require__(34),
 	    DisplayObject = core.DisplayObject,
 	    _tempMatrix = new core.Matrix();
 
@@ -36215,10 +36983,10 @@
 
 
 /***/ },
-/* 96 */
+/* 98 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 
 	/**
 	 * The instance name of the object.
@@ -36249,10 +37017,10 @@
 
 
 /***/ },
-/* 97 */
+/* 99 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 
 	/**
 	* Returns the global position of the displayObject
@@ -36283,10 +37051,10 @@
 
 
 /***/ },
-/* 98 */
+/* 100 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 
 	/**
 	 * A MovieClip is a simple way to display an animation depicted by a list of textures.
@@ -36607,13 +37375,13 @@
 	};
 
 /***/ },
-/* 99 */
+/* 101 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32),
+	var core = __webpack_require__(34),
 	    // a sprite use dfor rendering textures..
 	    tempPoint = new core.Point(),
-	    CanvasTinter = __webpack_require__(65);
+	    CanvasTinter = __webpack_require__(67);
 
 	/**
 	 * A tiling sprite is a fast way of rendering a tiling image
@@ -37063,10 +37831,10 @@
 
 
 /***/ },
-/* 100 */
+/* 102 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 
 	/**
 	 * A BitmapText object will create a line or multiple lines of text using bitmap font. To
@@ -37455,7 +38223,7 @@
 
 
 /***/ },
-/* 101 */
+/* 103 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -37469,39 +38237,39 @@
 	 * @namespace PIXI.filters
 	 */
 	module.exports = {
-	    AsciiFilter:        __webpack_require__(102),
-	    BloomFilter:        __webpack_require__(103),
-	    BlurFilter:         __webpack_require__(106),
-	    BlurXFilter:        __webpack_require__(104),
-	    BlurYFilter:        __webpack_require__(105),
-	    BlurDirFilter:      __webpack_require__(107),
-	    ColorMatrixFilter:  __webpack_require__(108),
-	    ColorStepFilter:    __webpack_require__(109),
-	    ConvolutionFilter:  __webpack_require__(110),
-	    CrossHatchFilter:   __webpack_require__(111),
-	    DisplacementFilter: __webpack_require__(112),
-	    DotScreenFilter:    __webpack_require__(113),
-	    GrayFilter:         __webpack_require__(114),
-	    DropShadowFilter:   __webpack_require__(115),
-	    InvertFilter:       __webpack_require__(117),
-	    NoiseFilter:        __webpack_require__(118),
-	    PixelateFilter:     __webpack_require__(119),
-	    RGBSplitFilter:     __webpack_require__(120),
-	    ShockwaveFilter:    __webpack_require__(121),
-	    SepiaFilter:        __webpack_require__(122),
-	    SmartBlurFilter:    __webpack_require__(123),
-	    TiltShiftFilter:    __webpack_require__(124),
-	    TiltShiftXFilter:   __webpack_require__(125),
-	    TiltShiftYFilter:   __webpack_require__(127),
-	    TwistFilter:        __webpack_require__(128)
+	    AsciiFilter:        __webpack_require__(104),
+	    BloomFilter:        __webpack_require__(105),
+	    BlurFilter:         __webpack_require__(108),
+	    BlurXFilter:        __webpack_require__(106),
+	    BlurYFilter:        __webpack_require__(107),
+	    BlurDirFilter:      __webpack_require__(109),
+	    ColorMatrixFilter:  __webpack_require__(110),
+	    ColorStepFilter:    __webpack_require__(111),
+	    ConvolutionFilter:  __webpack_require__(112),
+	    CrossHatchFilter:   __webpack_require__(113),
+	    DisplacementFilter: __webpack_require__(114),
+	    DotScreenFilter:    __webpack_require__(115),
+	    GrayFilter:         __webpack_require__(116),
+	    DropShadowFilter:   __webpack_require__(117),
+	    InvertFilter:       __webpack_require__(119),
+	    NoiseFilter:        __webpack_require__(120),
+	    PixelateFilter:     __webpack_require__(121),
+	    RGBSplitFilter:     __webpack_require__(122),
+	    ShockwaveFilter:    __webpack_require__(123),
+	    SepiaFilter:        __webpack_require__(124),
+	    SmartBlurFilter:    __webpack_require__(125),
+	    TiltShiftFilter:    __webpack_require__(126),
+	    TiltShiftXFilter:   __webpack_require__(127),
+	    TiltShiftYFilter:   __webpack_require__(129),
+	    TwistFilter:        __webpack_require__(130)
 	};
 
 
 /***/ },
-/* 102 */
+/* 104 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 	// @see https://github.com/substack/brfs/issues/25
 
 
@@ -37559,12 +38327,12 @@
 
 
 /***/ },
-/* 103 */
+/* 105 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32),
-	    BlurXFilter = __webpack_require__(104),
-	    BlurYFilter = __webpack_require__(105);
+	var core = __webpack_require__(34),
+	    BlurXFilter = __webpack_require__(106),
+	    BlurYFilter = __webpack_require__(107);
 
 	/**
 	 * The BloomFilter applies a Gaussian blur to an object.
@@ -37664,10 +38432,10 @@
 
 
 /***/ },
-/* 104 */
+/* 106 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 	// @see https://github.com/substack/brfs/issues/25
 
 
@@ -37761,10 +38529,10 @@
 
 
 /***/ },
-/* 105 */
+/* 107 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 	// @see https://github.com/substack/brfs/issues/25
 
 
@@ -37851,12 +38619,12 @@
 
 
 /***/ },
-/* 106 */
+/* 108 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32),
-	    BlurXFilter = __webpack_require__(104),
-	    BlurYFilter = __webpack_require__(105);
+	var core = __webpack_require__(34),
+	    BlurXFilter = __webpack_require__(106),
+	    BlurYFilter = __webpack_require__(107);
 
 	/**
 	 * The BlurFilter applies a Gaussian blur to an object.
@@ -37965,10 +38733,10 @@
 
 
 /***/ },
-/* 107 */
+/* 109 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 
 
 	/**
@@ -38111,10 +38879,10 @@
 
 
 /***/ },
-/* 108 */
+/* 110 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 	// @see https://github.com/substack/brfs/issues/25
 
 
@@ -38651,10 +39419,10 @@
 
 
 /***/ },
-/* 109 */
+/* 111 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 	// @see https://github.com/substack/brfs/issues/25
 
 
@@ -38704,10 +39472,10 @@
 
 
 /***/ },
-/* 110 */
+/* 112 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 	// @see https://github.com/substack/brfs/issues/25
 
 
@@ -38799,10 +39567,10 @@
 
 
 /***/ },
-/* 111 */
+/* 113 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 	// @see https://github.com/substack/brfs/issues/25
 
 
@@ -38829,10 +39597,10 @@
 
 
 /***/ },
-/* 112 */
+/* 114 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 	// @see https://github.com/substack/brfs/issues/25
 
 
@@ -38917,10 +39685,10 @@
 
 
 /***/ },
-/* 113 */
+/* 115 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 	// @see https://github.com/substack/brfs/issues/25
 
 
@@ -38993,10 +39761,10 @@
 
 
 /***/ },
-/* 114 */
+/* 116 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 	// @see https://github.com/substack/brfs/issues/25
 
 
@@ -39046,12 +39814,12 @@
 
 
 /***/ },
-/* 115 */
+/* 117 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32),
-	    BlurXFilter = __webpack_require__(104),
-	    BlurYTintFilter = __webpack_require__(116);
+	var core = __webpack_require__(34),
+	    BlurXFilter = __webpack_require__(106),
+	    BlurYTintFilter = __webpack_require__(118);
 
 	/**
 	 * The DropShadowFilter applies a Gaussian blur to an object.
@@ -39243,10 +40011,10 @@
 
 
 /***/ },
-/* 116 */
+/* 118 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 
 	// @see https://github.com/substack/brfs/issues/25
 
@@ -39338,10 +40106,10 @@
 
 
 /***/ },
-/* 117 */
+/* 119 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 	// @see https://github.com/substack/brfs/issues/25
 
 
@@ -39392,10 +40160,10 @@
 
 
 /***/ },
-/* 118 */
+/* 120 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 	// @see https://github.com/substack/brfs/issues/25
 
 
@@ -39451,10 +40219,10 @@
 
 
 /***/ },
-/* 119 */
+/* 121 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 	// @see https://github.com/substack/brfs/issues/25
 
 
@@ -39506,10 +40274,10 @@
 
 
 /***/ },
-/* 120 */
+/* 122 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 	// @see https://github.com/substack/brfs/issues/25
 
 
@@ -39596,10 +40364,10 @@
 
 
 /***/ },
-/* 121 */
+/* 123 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 	// @see https://github.com/substack/brfs/issues/25
 
 
@@ -39688,10 +40456,10 @@
 
 
 /***/ },
-/* 122 */
+/* 124 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 	// @see https://github.com/substack/brfs/issues/25
 
 
@@ -39742,10 +40510,10 @@
 
 
 /***/ },
-/* 123 */
+/* 125 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 	// @see https://github.com/substack/brfs/issues/25
 
 
@@ -39776,12 +40544,12 @@
 
 
 /***/ },
-/* 124 */
+/* 126 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32),
-	    TiltShiftXFilter = __webpack_require__(125),
-	    TiltShiftYFilter = __webpack_require__(127);
+	var core = __webpack_require__(34),
+	    TiltShiftXFilter = __webpack_require__(127),
+	    TiltShiftYFilter = __webpack_require__(129);
 
 	/**
 	 * @author Vico @vicocotea
@@ -39890,10 +40658,10 @@
 
 
 /***/ },
-/* 125 */
+/* 127 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var TiltShiftAxisFilter = __webpack_require__(126);
+	var TiltShiftAxisFilter = __webpack_require__(128);
 
 	/**
 	 * @author Vico @vicocotea
@@ -39932,10 +40700,10 @@
 
 
 /***/ },
-/* 126 */
+/* 128 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 	// @see https://github.com/substack/brfs/issues/25
 
 
@@ -40061,10 +40829,10 @@
 
 
 /***/ },
-/* 127 */
+/* 129 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var TiltShiftAxisFilter = __webpack_require__(126);
+	var TiltShiftAxisFilter = __webpack_require__(128);
 
 	/**
 	 * @author Vico @vicocotea
@@ -40103,10 +40871,10 @@
 
 
 /***/ },
-/* 128 */
+/* 130 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 	// @see https://github.com/substack/brfs/issues/25
 
 
@@ -40192,7 +40960,7 @@
 
 
 /***/ },
-/* 129 */
+/* 131 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -40206,17 +40974,17 @@
 	 * @namespace PIXI.interaction
 	 */
 	module.exports = {
-	    InteractionData:    __webpack_require__(130),
-	    InteractionManager: __webpack_require__(131),
-	    interactiveTarget:  __webpack_require__(132)
+	    InteractionData:    __webpack_require__(132),
+	    InteractionManager: __webpack_require__(133),
+	    interactiveTarget:  __webpack_require__(134)
 	};
 
 
 /***/ },
-/* 130 */
+/* 132 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 
 	/**
 	 * Holds all information related to an Interaction event
@@ -40266,16 +41034,16 @@
 
 
 /***/ },
-/* 131 */
+/* 133 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32),
-	    InteractionData = __webpack_require__(130);
+	var core = __webpack_require__(34),
+	    InteractionData = __webpack_require__(132);
 
 	// Mix interactiveTarget into core.DisplayObject.prototype
 	Object.assign(
 	    core.DisplayObject.prototype,
-	    __webpack_require__(132)
+	    __webpack_require__(134)
 	);
 
 	/**
@@ -41176,7 +41944,7 @@
 
 
 /***/ },
-/* 132 */
+/* 134 */
 /***/ function(module, exports) {
 
 	/**
@@ -41229,7 +41997,7 @@
 
 
 /***/ },
-/* 133 */
+/* 135 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -41243,24 +42011,24 @@
 	 * @namespace PIXI.loaders
 	 */
 	module.exports = {
-	    Loader:             __webpack_require__(134),
+	    Loader:             __webpack_require__(136),
 
 	    // parsers
-	    bitmapFontParser:   __webpack_require__(150),
-	    spritesheetParser:  __webpack_require__(148),
-	    textureParser:      __webpack_require__(147),
-	    Resource:           __webpack_require__(135).Resource
+	    bitmapFontParser:   __webpack_require__(152),
+	    spritesheetParser:  __webpack_require__(150),
+	    textureParser:      __webpack_require__(149),
+	    Resource:           __webpack_require__(137).Resource
 	};
 
 
 /***/ },
-/* 134 */
+/* 136 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var ResourceLoader = __webpack_require__(135),
-	    textureParser = __webpack_require__(147),
-	    spritesheetParser = __webpack_require__(148),
-	    bitmapFontParser = __webpack_require__(150);
+	var ResourceLoader = __webpack_require__(137),
+	    textureParser = __webpack_require__(149),
+	    spritesheetParser = __webpack_require__(150),
+	    bitmapFontParser = __webpack_require__(152);
 
 	/**
 	 *
@@ -41320,31 +42088,31 @@
 
 
 /***/ },
-/* 135 */
+/* 137 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(136);
+	module.exports = __webpack_require__(138);
 
-	module.exports.Resource = __webpack_require__(143);
+	module.exports.Resource = __webpack_require__(145);
 
 	module.exports.middleware = {
 	    caching: {
-	        memory: __webpack_require__(144)
+	        memory: __webpack_require__(146)
 	    },
 	    parsing: {
-	        blob: __webpack_require__(145)
+	        blob: __webpack_require__(147)
 	    }
 	};
 
 
 /***/ },
-/* 136 */
+/* 138 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var async       = __webpack_require__(137),
-	    urlParser   = __webpack_require__(138),
-	    Resource    = __webpack_require__(143),
-	    EventEmitter = __webpack_require__(44);
+	var async       = __webpack_require__(139),
+	    urlParser   = __webpack_require__(140),
+	    Resource    = __webpack_require__(145),
+	    EventEmitter = __webpack_require__(46);
 
 	/**
 	 * Manages the state and loading of multiple resources to load.
@@ -41800,7 +42568,7 @@
 
 
 /***/ },
-/* 137 */
+/* 139 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(process, setImmediate) {/*!
@@ -42927,10 +43695,10 @@
 
 	}());
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(48), __webpack_require__(47).setImmediate))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(50), __webpack_require__(49).setImmediate))
 
 /***/ },
-/* 138 */
+/* 140 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Copyright Joyent, Inc. and other Node contributors.
@@ -42954,7 +43722,7 @@
 	// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 	// USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-	var punycode = __webpack_require__(139);
+	var punycode = __webpack_require__(141);
 
 	exports.parse = urlParse;
 	exports.resolve = urlResolve;
@@ -43026,7 +43794,7 @@
 	      'gopher:': true,
 	      'file:': true
 	    },
-	    querystring = __webpack_require__(140);
+	    querystring = __webpack_require__(142);
 
 	function urlParse(url, parseQueryString, slashesDenoteHost) {
 	  if (url && isObject(url) && url instanceof Url) return url;
@@ -43643,7 +44411,7 @@
 
 
 /***/ },
-/* 139 */
+/* 141 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module, global) {/*! https://mths.be/punycode v1.3.2 by @mathias */
@@ -44178,17 +44946,17 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(14)(module), (function() { return this; }())))
 
 /***/ },
-/* 140 */
+/* 142 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	exports.decode = exports.parse = __webpack_require__(141);
-	exports.encode = exports.stringify = __webpack_require__(142);
+	exports.decode = exports.parse = __webpack_require__(143);
+	exports.encode = exports.stringify = __webpack_require__(144);
 
 
 /***/ },
-/* 141 */
+/* 143 */
 /***/ function(module, exports) {
 
 	// Copyright Joyent, Inc. and other Node contributors.
@@ -44274,7 +45042,7 @@
 
 
 /***/ },
-/* 142 */
+/* 144 */
 /***/ function(module, exports) {
 
 	// Copyright Joyent, Inc. and other Node contributors.
@@ -44344,11 +45112,11 @@
 
 
 /***/ },
-/* 143 */
+/* 145 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var EventEmitter = __webpack_require__(44),
-	    _url = __webpack_require__(138),
+	var EventEmitter = __webpack_require__(46),
+	    _url = __webpack_require__(140),
 	    // tests is CORS is supported in XHR, if not we need to use XDR
 	    useXdr = !!(window.XDomainRequest && !('withCredentials' in (new XMLHttpRequest()))),
 	    tempAnchor = null;
@@ -45150,7 +45918,7 @@
 
 
 /***/ },
-/* 144 */
+/* 146 */
 /***/ function(module, exports) {
 
 	// a simple in-memory cache for resources
@@ -45176,11 +45944,11 @@
 
 
 /***/ },
-/* 145 */
+/* 147 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Resource = __webpack_require__(143),
-	    b64 = __webpack_require__(146);
+	var Resource = __webpack_require__(145),
+	    b64 = __webpack_require__(148);
 
 	window.URL = window.URL || window.webkitURL;
 
@@ -45240,7 +46008,7 @@
 
 
 /***/ },
-/* 146 */
+/* 148 */
 /***/ function(module, exports) {
 
 	module.exports = {
@@ -45310,10 +46078,10 @@
 
 
 /***/ },
-/* 147 */
+/* 149 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 
 	module.exports = function ()
 	{
@@ -45336,13 +46104,13 @@
 
 
 /***/ },
-/* 148 */
+/* 150 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Resource = __webpack_require__(135).Resource,
-	    path = __webpack_require__(149),
-	    core = __webpack_require__(32),
-	    async = __webpack_require__(46);
+	var Resource = __webpack_require__(137).Resource,
+	    path = __webpack_require__(151),
+	    core = __webpack_require__(34),
+	    async = __webpack_require__(48);
 
 	var BATCH_SIZE = 1000;
 
@@ -45459,7 +46227,7 @@
 
 
 /***/ },
-/* 149 */
+/* 151 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {// Copyright Joyent, Inc. and other Node contributors.
@@ -45687,16 +46455,16 @@
 	    }
 	;
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(48)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(50)))
 
 /***/ },
-/* 150 */
+/* 152 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Resource = __webpack_require__(135).Resource,
-	    core = __webpack_require__(32),
-	    extras = __webpack_require__(94),
-	    path = __webpack_require__(149);
+	var Resource = __webpack_require__(137).Resource,
+	    core = __webpack_require__(34),
+	    extras = __webpack_require__(96),
+	    path = __webpack_require__(151);
 
 
 	function parse(resource, texture) {
@@ -45818,7 +46586,7 @@
 
 
 /***/ },
-/* 151 */
+/* 153 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -45832,19 +46600,19 @@
 	 * @namespace PIXI.mesh
 	 */
 	module.exports = {
-	    Mesh:           __webpack_require__(152),
-	    Plane:           __webpack_require__(153),
-	    Rope:           __webpack_require__(154),
-	    MeshRenderer:   __webpack_require__(155),
-	    MeshShader:     __webpack_require__(156)
+	    Mesh:           __webpack_require__(154),
+	    Plane:           __webpack_require__(155),
+	    Rope:           __webpack_require__(156),
+	    MeshRenderer:   __webpack_require__(157),
+	    MeshShader:     __webpack_require__(158)
 	};
 
 
 /***/ },
-/* 152 */
+/* 154 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32),
+	var core = __webpack_require__(34),
 	    tempPoint = new core.Point(),
 	    tempPolygon = new core.Polygon();
 
@@ -46323,10 +47091,10 @@
 
 
 /***/ },
-/* 153 */
+/* 155 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Mesh = __webpack_require__(152);
+	var Mesh = __webpack_require__(154);
 
 	/**
 	 * The Plane allows you to draw a texture across several points and them manipulate these points
@@ -46453,11 +47221,11 @@
 
 
 /***/ },
-/* 154 */
+/* 156 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Mesh = __webpack_require__(152);
-	var core = __webpack_require__(32);
+	var Mesh = __webpack_require__(154);
+	var core = __webpack_require__(34);
 
 	/**
 	 * The rope allows you to draw a texture across several points and them manipulate these points
@@ -46670,11 +47438,11 @@
 
 
 /***/ },
-/* 155 */
+/* 157 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32),
-	    Mesh = __webpack_require__(152);
+	var core = __webpack_require__(34),
+	    Mesh = __webpack_require__(154);
 
 	/**
 	 * @author Mat Groves
@@ -46903,10 +47671,10 @@
 
 
 /***/ },
-/* 156 */
+/* 158 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 
 	/**
 	 * @class
@@ -46968,7 +47736,7 @@
 
 
 /***/ },
-/* 157 */
+/* 159 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -46982,13 +47750,13 @@
 	 * @namespace PIXI.interaction
 	 */
 	module.exports = {
-	    accessibleTarget:     __webpack_require__(158),
-	    AccessibilityManager: __webpack_require__(159)
+	    accessibleTarget:     __webpack_require__(160),
+	    AccessibilityManager: __webpack_require__(161)
 	};
 
 
 /***/ },
-/* 158 */
+/* 160 */
 /***/ function(module, exports) {
 
 	/**
@@ -47038,15 +47806,15 @@
 
 
 /***/ },
-/* 159 */
+/* 161 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var core = __webpack_require__(32);
+	var core = __webpack_require__(34);
 
 	// add some extra variables to the container..
 	Object.assign(
 	    core.DisplayObject.prototype,
-	    __webpack_require__(158)
+	    __webpack_require__(160)
 	);
 
 
@@ -47452,14 +48220,14 @@
 
 
 /***/ },
-/* 160 */
+/* 162 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*global console */
-	var core = __webpack_require__(32),
-	    mesh = __webpack_require__(151),
-	    extras = __webpack_require__(94),
-	    filters = __webpack_require__(101);
+	var core = __webpack_require__(34),
+	    mesh = __webpack_require__(153),
+	    extras = __webpack_require__(96),
+	    filters = __webpack_require__(103);
 
 	/**
 	 * @class
@@ -47807,7 +48575,7 @@
 
 
 /***/ },
-/* 161 */
+/* 163 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -47819,7 +48587,7 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _pixi = __webpack_require__(26);
+	var _pixi = __webpack_require__(28);
 
 	var _pixi2 = _interopRequireDefault(_pixi);
 
@@ -47827,7 +48595,7 @@
 
 	var _engine2 = _interopRequireDefault(_engine);
 
-	var _component = __webpack_require__(20);
+	var _component = __webpack_require__(21);
 
 	var _component2 = _interopRequireDefault(_component);
 
@@ -47889,7 +48657,7 @@
 	exports.default = PIXISprite;
 
 /***/ },
-/* 162 */
+/* 164 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -47898,7 +48666,7 @@
 	  value: true
 	});
 
-	var _vector2d = __webpack_require__(163);
+	var _vector2d = __webpack_require__(165);
 
 	var _vector2d2 = _interopRequireDefault(_vector2d);
 
@@ -47926,7 +48694,7 @@
 	exports.default = geMath;
 
 /***/ },
-/* 163 */
+/* 165 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -48099,7 +48867,7 @@
 	exports.default = Vector2d;
 
 /***/ },
-/* 164 */
+/* 166 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -48114,13 +48882,17 @@
 
 	var _engine = __webpack_require__(12);
 
-	var _testObject = __webpack_require__(165);
+	var _testObject = __webpack_require__(167);
 
 	var _testObject2 = _interopRequireDefault(_testObject);
 
 	var _soundObject = __webpack_require__(168);
 
 	var _soundObject2 = _interopRequireDefault(_soundObject);
+
+	var _musicObject = __webpack_require__(169);
+
+	var _musicObject2 = _interopRequireDefault(_musicObject);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -48140,6 +48912,7 @@
 
 	        _engine.ObjectFactory.register('test', _testObject2.default);
 	        _engine.ObjectFactory.register('sound-test', _soundObject2.default);
+	        _engine.ObjectFactory.register('music-test', _musicObject2.default);
 	        return _this;
 	    }
 
@@ -48153,7 +48926,8 @@
 	                y: 200
 	            });
 
-	            _engine.ObjectFactory.spawn('sound-test');
+	            // ObjectFactory.spawn('sound-test');
+	            _engine.ObjectFactory.spawn('music-test');
 	        }
 	    }]);
 
@@ -48163,7 +48937,7 @@
 	exports.default = testLevel;
 
 /***/ },
-/* 165 */
+/* 167 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -48204,773 +48978,6 @@
 	exports.default = TestObject;
 
 /***/ },
-/* 166 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__; // ----------------------------------------------------------------------------
-	 // Buzz, a Javascript HTML5 Audio library
-	 // v1.1.4 - released 2014-07-13 11:19
-	 // Licensed under the MIT license.
-	 // http://buzz.jaysalvat.com/
-	 // ----------------------------------------------------------------------------
-	 // Copyright (C) 2010-2014 Jay Salvat
-	 // http://jaysalvat.com/
-	 // ----------------------------------------------------------------------------
-
-	(function(context, factory) {
-	    if (typeof module !== "undefined" && module.exports) {
-	        module.exports = factory();
-	    } else if (true) {
-	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-	    } else {
-	        context.buzz = factory();
-	    }
-	})(this, function() {
-	    var AudioContextCtor = window.AudioContext || window.webkitAudioContext;
-	    var buzz = {
-	        audioCtx: AudioContextCtor ? new AudioContextCtor() : null,
-	        defaults: {
-	            autoplay: false,
-	            duration: 5e3,
-	            formats: [],
-	            loop: false,
-	            placeholder: "--",
-	            preload: "metadata",
-	            volume: 80,
-	            document: window.document
-	        },
-	        types: {
-	            mp3: "audio/mpeg",
-	            ogg: "audio/ogg",
-	            wav: "audio/wav",
-	            aac: "audio/aac",
-	            m4a: "audio/x-m4a"
-	        },
-	        sounds: [],
-	        el: document.createElement("audio"),
-	        sound: function(src, options) {
-	            options = options || {};
-	            var doc = options.document || buzz.defaults.document;
-	            var pid = 0, events = [], eventsOnce = {}, supported = buzz.isSupported();
-	            this.load = function() {
-	                if (!supported) {
-	                    return this;
-	                }
-	                this.sound.load();
-	                return this;
-	            };
-	            this.play = function() {
-	                if (!supported) {
-	                    return this;
-	                }
-	                this.sound.play();
-	                return this;
-	            };
-	            this.togglePlay = function() {
-	                if (!supported) {
-	                    return this;
-	                }
-	                if (this.sound.paused) {
-	                    this.sound.play();
-	                } else {
-	                    this.sound.pause();
-	                }
-	                return this;
-	            };
-	            this.pause = function() {
-	                if (!supported) {
-	                    return this;
-	                }
-	                this.sound.pause();
-	                return this;
-	            };
-	            this.isPaused = function() {
-	                if (!supported) {
-	                    return null;
-	                }
-	                return this.sound.paused;
-	            };
-	            this.stop = function() {
-	                if (!supported) {
-	                    return this;
-	                }
-	                this.setTime(0);
-	                this.sound.pause();
-	                return this;
-	            };
-	            this.isEnded = function() {
-	                if (!supported) {
-	                    return null;
-	                }
-	                return this.sound.ended;
-	            };
-	            this.loop = function() {
-	                if (!supported) {
-	                    return this;
-	                }
-	                this.sound.loop = "loop";
-	                this.bind("ended.buzzloop", function() {
-	                    this.currentTime = 0;
-	                    this.play();
-	                });
-	                return this;
-	            };
-	            this.unloop = function() {
-	                if (!supported) {
-	                    return this;
-	                }
-	                this.sound.removeAttribute("loop");
-	                this.unbind("ended.buzzloop");
-	                return this;
-	            };
-	            this.mute = function() {
-	                if (!supported) {
-	                    return this;
-	                }
-	                this.sound.muted = true;
-	                return this;
-	            };
-	            this.unmute = function() {
-	                if (!supported) {
-	                    return this;
-	                }
-	                this.sound.muted = false;
-	                return this;
-	            };
-	            this.toggleMute = function() {
-	                if (!supported) {
-	                    return this;
-	                }
-	                this.sound.muted = !this.sound.muted;
-	                return this;
-	            };
-	            this.isMuted = function() {
-	                if (!supported) {
-	                    return null;
-	                }
-	                return this.sound.muted;
-	            };
-	            this.setVolume = function(volume) {
-	                if (!supported) {
-	                    return this;
-	                }
-	                if (volume < 0) {
-	                    volume = 0;
-	                }
-	                if (volume > 100) {
-	                    volume = 100;
-	                }
-	                this.volume = volume;
-	                this.sound.volume = volume / 100;
-	                return this;
-	            };
-	            this.getVolume = function() {
-	                if (!supported) {
-	                    return this;
-	                }
-	                return this.volume;
-	            };
-	            this.increaseVolume = function(value) {
-	                return this.setVolume(this.volume + (value || 1));
-	            };
-	            this.decreaseVolume = function(value) {
-	                return this.setVolume(this.volume - (value || 1));
-	            };
-	            this.setTime = function(time) {
-	                if (!supported) {
-	                    return this;
-	                }
-	                var set = true;
-	                this.whenReady(function() {
-	                    if (set === true) {
-	                        set = false;
-	                        this.sound.currentTime = time;
-	                    }
-	                });
-	                return this;
-	            };
-	            this.getTime = function() {
-	                if (!supported) {
-	                    return null;
-	                }
-	                var time = Math.round(this.sound.currentTime * 100) / 100;
-	                return isNaN(time) ? buzz.defaults.placeholder : time;
-	            };
-	            this.setPercent = function(percent) {
-	                if (!supported) {
-	                    return this;
-	                }
-	                return this.setTime(buzz.fromPercent(percent, this.sound.duration));
-	            };
-	            this.getPercent = function() {
-	                if (!supported) {
-	                    return null;
-	                }
-	                var percent = Math.round(buzz.toPercent(this.sound.currentTime, this.sound.duration));
-	                return isNaN(percent) ? buzz.defaults.placeholder : percent;
-	            };
-	            this.setSpeed = function(duration) {
-	                if (!supported) {
-	                    return this;
-	                }
-	                this.sound.playbackRate = duration;
-	                return this;
-	            };
-	            this.getSpeed = function() {
-	                if (!supported) {
-	                    return null;
-	                }
-	                return this.sound.playbackRate;
-	            };
-	            this.getDuration = function() {
-	                if (!supported) {
-	                    return null;
-	                }
-	                var duration = Math.round(this.sound.duration * 100) / 100;
-	                return isNaN(duration) ? buzz.defaults.placeholder : duration;
-	            };
-	            this.getPlayed = function() {
-	                if (!supported) {
-	                    return null;
-	                }
-	                return timerangeToArray(this.sound.played);
-	            };
-	            this.getBuffered = function() {
-	                if (!supported) {
-	                    return null;
-	                }
-	                return timerangeToArray(this.sound.buffered);
-	            };
-	            this.getSeekable = function() {
-	                if (!supported) {
-	                    return null;
-	                }
-	                return timerangeToArray(this.sound.seekable);
-	            };
-	            this.getErrorCode = function() {
-	                if (supported && this.sound.error) {
-	                    return this.sound.error.code;
-	                }
-	                return 0;
-	            };
-	            this.getErrorMessage = function() {
-	                if (!supported) {
-	                    return null;
-	                }
-	                switch (this.getErrorCode()) {
-	                  case 1:
-	                    return "MEDIA_ERR_ABORTED";
-
-	                  case 2:
-	                    return "MEDIA_ERR_NETWORK";
-
-	                  case 3:
-	                    return "MEDIA_ERR_DECODE";
-
-	                  case 4:
-	                    return "MEDIA_ERR_SRC_NOT_SUPPORTED";
-
-	                  default:
-	                    return null;
-	                }
-	            };
-	            this.getStateCode = function() {
-	                if (!supported) {
-	                    return null;
-	                }
-	                return this.sound.readyState;
-	            };
-	            this.getStateMessage = function() {
-	                if (!supported) {
-	                    return null;
-	                }
-	                switch (this.getStateCode()) {
-	                  case 0:
-	                    return "HAVE_NOTHING";
-
-	                  case 1:
-	                    return "HAVE_METADATA";
-
-	                  case 2:
-	                    return "HAVE_CURRENT_DATA";
-
-	                  case 3:
-	                    return "HAVE_FUTURE_DATA";
-
-	                  case 4:
-	                    return "HAVE_ENOUGH_DATA";
-
-	                  default:
-	                    return null;
-	                }
-	            };
-	            this.getNetworkStateCode = function() {
-	                if (!supported) {
-	                    return null;
-	                }
-	                return this.sound.networkState;
-	            };
-	            this.getNetworkStateMessage = function() {
-	                if (!supported) {
-	                    return null;
-	                }
-	                switch (this.getNetworkStateCode()) {
-	                  case 0:
-	                    return "NETWORK_EMPTY";
-
-	                  case 1:
-	                    return "NETWORK_IDLE";
-
-	                  case 2:
-	                    return "NETWORK_LOADING";
-
-	                  case 3:
-	                    return "NETWORK_NO_SOURCE";
-
-	                  default:
-	                    return null;
-	                }
-	            };
-	            this.set = function(key, value) {
-	                if (!supported) {
-	                    return this;
-	                }
-	                this.sound[key] = value;
-	                return this;
-	            };
-	            this.get = function(key) {
-	                if (!supported) {
-	                    return null;
-	                }
-	                return key ? this.sound[key] : this.sound;
-	            };
-	            this.bind = function(types, func) {
-	                if (!supported) {
-	                    return this;
-	                }
-	                types = types.split(" ");
-	                var self = this, efunc = function(e) {
-	                    func.call(self, e);
-	                };
-	                for (var t = 0; t < types.length; t++) {
-	                    var type = types[t], idx = type;
-	                    type = idx.split(".")[0];
-	                    events.push({
-	                        idx: idx,
-	                        func: efunc
-	                    });
-	                    this.sound.addEventListener(type, efunc, true);
-	                }
-	                return this;
-	            };
-	            this.unbind = function(types) {
-	                if (!supported) {
-	                    return this;
-	                }
-	                types = types.split(" ");
-	                for (var t = 0; t < types.length; t++) {
-	                    var idx = types[t], type = idx.split(".")[0];
-	                    for (var i = 0; i < events.length; i++) {
-	                        var namespace = events[i].idx.split(".");
-	                        if (events[i].idx == idx || namespace[1] && namespace[1] == idx.replace(".", "")) {
-	                            this.sound.removeEventListener(type, events[i].func, true);
-	                            events.splice(i, 1);
-	                        }
-	                    }
-	                }
-	                return this;
-	            };
-	            this.bindOnce = function(type, func) {
-	                if (!supported) {
-	                    return this;
-	                }
-	                var self = this;
-	                eventsOnce[pid++] = false;
-	                this.bind(type + "." + pid, function() {
-	                    if (!eventsOnce[pid]) {
-	                        eventsOnce[pid] = true;
-	                        func.call(self);
-	                    }
-	                    self.unbind(type + "." + pid);
-	                });
-	                return this;
-	            };
-	            this.trigger = function(types) {
-	                if (!supported) {
-	                    return this;
-	                }
-	                types = types.split(" ");
-	                for (var t = 0; t < types.length; t++) {
-	                    var idx = types[t];
-	                    for (var i = 0; i < events.length; i++) {
-	                        var eventType = events[i].idx.split(".");
-	                        if (events[i].idx == idx || eventType[0] && eventType[0] == idx.replace(".", "")) {
-	                            var evt = doc.createEvent("HTMLEvents");
-	                            evt.initEvent(eventType[0], false, true);
-	                            this.sound.dispatchEvent(evt);
-	                        }
-	                    }
-	                }
-	                return this;
-	            };
-	            this.fadeTo = function(to, duration, callback) {
-	                if (!supported) {
-	                    return this;
-	                }
-	                if (duration instanceof Function) {
-	                    callback = duration;
-	                    duration = buzz.defaults.duration;
-	                } else {
-	                    duration = duration || buzz.defaults.duration;
-	                }
-	                var from = this.volume, delay = duration / Math.abs(from - to), self = this;
-	                this.play();
-	                function doFade() {
-	                    setTimeout(function() {
-	                        if (from < to && self.volume < to) {
-	                            self.setVolume(self.volume += 1);
-	                            doFade();
-	                        } else if (from > to && self.volume > to) {
-	                            self.setVolume(self.volume -= 1);
-	                            doFade();
-	                        } else if (callback instanceof Function) {
-	                            callback.apply(self);
-	                        }
-	                    }, delay);
-	                }
-	                this.whenReady(function() {
-	                    doFade();
-	                });
-	                return this;
-	            };
-	            this.fadeIn = function(duration, callback) {
-	                if (!supported) {
-	                    return this;
-	                }
-	                return this.setVolume(0).fadeTo(100, duration, callback);
-	            };
-	            this.fadeOut = function(duration, callback) {
-	                if (!supported) {
-	                    return this;
-	                }
-	                return this.fadeTo(0, duration, callback);
-	            };
-	            this.fadeWith = function(sound, duration) {
-	                if (!supported) {
-	                    return this;
-	                }
-	                this.fadeOut(duration, function() {
-	                    this.stop();
-	                });
-	                sound.play().fadeIn(duration);
-	                return this;
-	            };
-	            this.whenReady = function(func) {
-	                if (!supported) {
-	                    return null;
-	                }
-	                var self = this;
-	                if (this.sound.readyState === 0) {
-	                    this.bind("canplay.buzzwhenready", function() {
-	                        func.call(self);
-	                    });
-	                } else {
-	                    func.call(self);
-	                }
-	            };
-	            function timerangeToArray(timeRange) {
-	                var array = [], length = timeRange.length - 1;
-	                for (var i = 0; i <= length; i++) {
-	                    array.push({
-	                        start: timeRange.start(i),
-	                        end: timeRange.end(i)
-	                    });
-	                }
-	                return array;
-	            }
-	            function getExt(filename) {
-	                return filename.split(".").pop();
-	            }
-	            function addSource(sound, src) {
-	                var source = doc.createElement("source");
-	                source.src = src;
-	                if (buzz.types[getExt(src)]) {
-	                    source.type = buzz.types[getExt(src)];
-	                }
-	                sound.appendChild(source);
-	            }
-	            if (supported && src) {
-	                for (var i in buzz.defaults) {
-	                    if (buzz.defaults.hasOwnProperty(i)) {
-	                        if (options[i] === undefined) options[i] = buzz.defaults[i];
-	                    }
-	                }
-	                this.sound = doc.createElement("audio");
-	                if (buzz.audioCtx) {
-	                    this.source = buzz.audioCtx.createMediaElementSource(this.sound);
-	                    this.source.connect(buzz.audioCtx.destination);
-	                }
-	                if (src instanceof Array) {
-	                    for (var j in src) {
-	                        if (src.hasOwnProperty(j)) {
-	                            addSource(this.sound, src[j]);
-	                        }
-	                    }
-	                } else if (options.formats.length) {
-	                    for (var k in options.formats) {
-	                        if (options.formats.hasOwnProperty(k)) {
-	                            addSource(this.sound, src + "." + options.formats[k]);
-	                        }
-	                    }
-	                } else {
-	                    addSource(this.sound, src);
-	                }
-	                if (options.loop) {
-	                    this.loop();
-	                }
-	                if (options.autoplay) {
-	                    this.sound.autoplay = "autoplay";
-	                }
-	                if (options.preload === true) {
-	                    this.sound.preload = "auto";
-	                } else if (options.preload === false) {
-	                    this.sound.preload = "none";
-	                } else {
-	                    this.sound.preload = options.preload;
-	                }
-	                this.setVolume(options.volume);
-	                buzz.sounds.push(this);
-	            }
-	        },
-	        group: function(sounds) {
-	            sounds = argsToArray(sounds, arguments);
-	            this.getSounds = function() {
-	                return sounds;
-	            };
-	            this.add = function(soundArray) {
-	                soundArray = argsToArray(soundArray, arguments);
-	                for (var a = 0; a < soundArray.length; a++) {
-	                    sounds.push(soundArray[a]);
-	                }
-	            };
-	            this.remove = function(soundArray) {
-	                soundArray = argsToArray(soundArray, arguments);
-	                for (var a = 0; a < soundArray.length; a++) {
-	                    for (var i = 0; i < sounds.length; i++) {
-	                        if (sounds[i] == soundArray[a]) {
-	                            sounds.splice(i, 1);
-	                            break;
-	                        }
-	                    }
-	                }
-	            };
-	            this.load = function() {
-	                fn("load");
-	                return this;
-	            };
-	            this.play = function() {
-	                fn("play");
-	                return this;
-	            };
-	            this.togglePlay = function() {
-	                fn("togglePlay");
-	                return this;
-	            };
-	            this.pause = function(time) {
-	                fn("pause", time);
-	                return this;
-	            };
-	            this.stop = function() {
-	                fn("stop");
-	                return this;
-	            };
-	            this.mute = function() {
-	                fn("mute");
-	                return this;
-	            };
-	            this.unmute = function() {
-	                fn("unmute");
-	                return this;
-	            };
-	            this.toggleMute = function() {
-	                fn("toggleMute");
-	                return this;
-	            };
-	            this.setVolume = function(volume) {
-	                fn("setVolume", volume);
-	                return this;
-	            };
-	            this.increaseVolume = function(value) {
-	                fn("increaseVolume", value);
-	                return this;
-	            };
-	            this.decreaseVolume = function(value) {
-	                fn("decreaseVolume", value);
-	                return this;
-	            };
-	            this.loop = function() {
-	                fn("loop");
-	                return this;
-	            };
-	            this.unloop = function() {
-	                fn("unloop");
-	                return this;
-	            };
-	            this.setTime = function(time) {
-	                fn("setTime", time);
-	                return this;
-	            };
-	            this.set = function(key, value) {
-	                fn("set", key, value);
-	                return this;
-	            };
-	            this.bind = function(type, func) {
-	                fn("bind", type, func);
-	                return this;
-	            };
-	            this.unbind = function(type) {
-	                fn("unbind", type);
-	                return this;
-	            };
-	            this.bindOnce = function(type, func) {
-	                fn("bindOnce", type, func);
-	                return this;
-	            };
-	            this.trigger = function(type) {
-	                fn("trigger", type);
-	                return this;
-	            };
-	            this.fade = function(from, to, duration, callback) {
-	                fn("fade", from, to, duration, callback);
-	                return this;
-	            };
-	            this.fadeIn = function(duration, callback) {
-	                fn("fadeIn", duration, callback);
-	                return this;
-	            };
-	            this.fadeOut = function(duration, callback) {
-	                fn("fadeOut", duration, callback);
-	                return this;
-	            };
-	            function fn() {
-	                var args = argsToArray(null, arguments), func = args.shift();
-	                for (var i = 0; i < sounds.length; i++) {
-	                    sounds[i][func].apply(sounds[i], args);
-	                }
-	            }
-	            function argsToArray(array, args) {
-	                return array instanceof Array ? array : Array.prototype.slice.call(args);
-	            }
-	        },
-	        all: function() {
-	            return new buzz.group(buzz.sounds);
-	        },
-	        isSupported: function() {
-	            return !!buzz.el.canPlayType;
-	        },
-	        isOGGSupported: function() {
-	            return !!buzz.el.canPlayType && buzz.el.canPlayType('audio/ogg; codecs="vorbis"');
-	        },
-	        isWAVSupported: function() {
-	            return !!buzz.el.canPlayType && buzz.el.canPlayType('audio/wav; codecs="1"');
-	        },
-	        isMP3Supported: function() {
-	            return !!buzz.el.canPlayType && buzz.el.canPlayType("audio/mpeg;");
-	        },
-	        isAACSupported: function() {
-	            return !!buzz.el.canPlayType && (buzz.el.canPlayType("audio/x-m4a;") || buzz.el.canPlayType("audio/aac;"));
-	        },
-	        toTimer: function(time, withHours) {
-	            var h, m, s;
-	            h = Math.floor(time / 3600);
-	            h = isNaN(h) ? "--" : h >= 10 ? h : "0" + h;
-	            m = withHours ? Math.floor(time / 60 % 60) : Math.floor(time / 60);
-	            m = isNaN(m) ? "--" : m >= 10 ? m : "0" + m;
-	            s = Math.floor(time % 60);
-	            s = isNaN(s) ? "--" : s >= 10 ? s : "0" + s;
-	            return withHours ? h + ":" + m + ":" + s : m + ":" + s;
-	        },
-	        fromTimer: function(time) {
-	            var splits = time.toString().split(":");
-	            if (splits && splits.length == 3) {
-	                time = parseInt(splits[0], 10) * 3600 + parseInt(splits[1], 10) * 60 + parseInt(splits[2], 10);
-	            }
-	            if (splits && splits.length == 2) {
-	                time = parseInt(splits[0], 10) * 60 + parseInt(splits[1], 10);
-	            }
-	            return time;
-	        },
-	        toPercent: function(value, total, decimal) {
-	            var r = Math.pow(10, decimal || 0);
-	            return Math.round(value * 100 / total * r) / r;
-	        },
-	        fromPercent: function(percent, total, decimal) {
-	            var r = Math.pow(10, decimal || 0);
-	            return Math.round(total / 100 * percent * r) / r;
-	        }
-	    };
-	    return buzz;
-	});
-
-/***/ },
-/* 167 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	var _script = __webpack_require__(21);
-
-	var _script2 = _interopRequireDefault(_script);
-
-	var _sounds = __webpack_require__(16);
-
-	var _sounds2 = _interopRequireDefault(_sounds);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	var LoopSound = function (_Script) {
-	    _inherits(LoopSound, _Script);
-
-	    function LoopSound(params) {
-	        _classCallCheck(this, LoopSound);
-
-	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(LoopSound).call(this));
-
-	        _this.params = params;
-	        return _this;
-	    }
-
-	    _createClass(LoopSound, [{
-	        key: 'start',
-	        value: function start() {
-	            console.log('LoopSound.start', this.params);
-	            var sound = _sounds2.default.getSound(this.params.name);
-	            if (sound) {
-	                setInterval(function () {
-	                    sound.play();
-	                }, this.params.interval);
-	            }
-	        }
-	    }]);
-
-	    return LoopSound;
-	}(_script2.default);
-
-	exports.default = LoopSound;
-
-/***/ },
 /* 168 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -49002,7 +49009,7 @@
 
 	        _this.addComponent(new _engine.BASIC_SCRIPTS.LOOP_SOUND({
 	            name: 'test-sound',
-	            interval: 2000
+	            interval: 10000
 	        }));
 	        return _this;
 	    }
@@ -49011,6 +49018,100 @@
 	}(_engine.GameObject);
 
 	exports.default = SoundObject;
+
+/***/ },
+/* 169 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _engine = __webpack_require__(12);
+
+	var _engine2 = _interopRequireDefault(_engine);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var SoundObject = function (_GameObject) {
+	    _inherits(SoundObject, _GameObject);
+
+	    function SoundObject() {
+	        _classCallCheck(this, SoundObject);
+
+	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(SoundObject).call(this));
+
+	        _this.addComponent(new _engine.BASIC_SCRIPTS.LOOP_MUSIC('test-music'));
+	        return _this;
+	    }
+
+	    return SoundObject;
+	}(_engine.GameObject);
+
+	exports.default = SoundObject;
+
+/***/ },
+/* 170 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _script = __webpack_require__(22);
+
+	var _script2 = _interopRequireDefault(_script);
+
+	var _sounds = __webpack_require__(16);
+
+	var _sounds2 = _interopRequireDefault(_sounds);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var LoopSound = function (_Script) {
+	    _inherits(LoopSound, _Script);
+
+	    function LoopSound(name) {
+	        _classCallCheck(this, LoopSound);
+
+	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(LoopSound).call(this));
+
+	        _this.name = name;
+	        return _this;
+	    }
+
+	    _createClass(LoopSound, [{
+	        key: 'start',
+	        value: function start() {
+	            var sound = _sounds2.default.getSound(this.name);
+	            if (sound) {
+	                sound.play().loop();
+	            }
+	        }
+	    }]);
+
+	    return LoopSound;
+	}(_script2.default);
+
+	exports.default = LoopSound;
 
 /***/ }
 /******/ ]);

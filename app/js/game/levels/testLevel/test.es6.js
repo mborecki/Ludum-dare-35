@@ -2,6 +2,7 @@ import {ObjectFactory, Level, GameObject, BASIC_SCRIPTS} from './../../engine/en
 
 import TestObject from './objects/testObject.es6';
 import SoundObject from './objects/soundObject.es6';
+import MusicObject from './objects/musicObject.es6';
 
 class testLevel extends Level {
     constructor () {
@@ -9,6 +10,7 @@ class testLevel extends Level {
 
         ObjectFactory.register('test', TestObject);
         ObjectFactory.register('sound-test', SoundObject);
+        ObjectFactory.register('music-test', MusicObject);
     }
 
     start() {
@@ -19,7 +21,8 @@ class testLevel extends Level {
             y: 200
         })
 
-        ObjectFactory.spawn('sound-test');
+        // ObjectFactory.spawn('sound-test');
+        ObjectFactory.spawn('music-test');
     }
 }
 

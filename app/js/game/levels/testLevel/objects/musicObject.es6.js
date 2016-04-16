@@ -4,10 +4,7 @@ class SoundObject extends GameObject {
     constructor() {
         super();
 
-        this.addComponent(new BASIC_SCRIPTS.LOOP_SOUND({
-            name: 'test-sound',
-            interval: 10000
-        }));
+        this.addComponent(new BASIC_SCRIPTS.LOOP_MUSIC('test-music'));
     }
 }
 
