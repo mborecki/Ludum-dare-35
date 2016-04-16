@@ -25,6 +25,16 @@ class Images {
                 resolve();
             }
 
+            img.onError = () => {
+                reject({
+                    message: 'Image error',
+                    data: {
+                        name,
+                        params
+                    }
+                });
+            }
+
             img.src = params.url;
         })
     }

@@ -14,10 +14,13 @@ class Game {
     init() {
 
         this.registerImages().then(() => {
+            console.info('Images Loaded');
             this.initKeyBindings();
             this.initLevels();
 
             Engine.start()
+        }).catch((e) => {
+            console.error(e);
         });
     }
 

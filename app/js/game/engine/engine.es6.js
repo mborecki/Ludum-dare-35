@@ -6,6 +6,7 @@ import GameObject from './gameObject.es6';
 import ObjectFactory from './objectFactory.es6';
 import Component from './component.es6';
 import Script from './script.es6';
+import BASIC_SCRIPTS from './basicScripts/index.es6';
 
 import PIXIRenderer from './renderers/pixi.es6';
 
@@ -46,7 +47,7 @@ class Engine {
     }
 
     get lastUpdate() {
-        this._lU || this.config.window.performance.now();
+        return this._lU || this.config.window.performance.now();
     }
     set lastUpdate(v) {
         this._lU = v;
@@ -94,7 +95,7 @@ class Engine {
         let now = this.config.window.performance.now();
         let deltaTime = now - this.lastUpdate;
 
-        this.update(deltaTime);
+        this.update(deltaTime / 1000);
         if (!this.drawing) {
             this.draw();
         } else {
@@ -197,4 +198,4 @@ export {Images as Images};
 export {Component as Component};
 export {Script as Script};
 export {geMath as geMath};
-
+export {BASIC_SCRIPTS as BASIC_SCRIPTS};

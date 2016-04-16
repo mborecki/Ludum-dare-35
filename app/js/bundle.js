@@ -109,10 +109,13 @@
 	            var _this = this;
 
 	            this.registerImages().then(function () {
+	                console.info('Images Loaded');
 	                _this.initKeyBindings();
 	                _this.initLevels();
 
 	                _engine2.default.start();
+	            }).catch(function (e) {
+	                console.error(e);
 	            });
 	        }
 	    }, {
@@ -151,7 +154,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.geMath = exports.Script = exports.Component = exports.Images = exports.ObjectFactory = exports.GameObject = exports.Level = exports.PIXI = undefined;
+	exports.BASIC_SCRIPTS = exports.geMath = exports.Script = exports.Component = exports.Images = exports.ObjectFactory = exports.GameObject = exports.Level = exports.PIXI = undefined;
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -182,6 +185,10 @@
 	var _script = __webpack_require__(20);
 
 	var _script2 = _interopRequireDefault(_script);
+
+	var _index = __webpack_require__(162);
+
+	var _index2 = _interopRequireDefault(_index);
 
 	var _pixi = __webpack_require__(21);
 
@@ -268,7 +275,7 @@
 	            var now = this.config.window.performance.now();
 	            var deltaTime = now - this.lastUpdate;
 
-	            this.update(deltaTime);
+	            this.update(deltaTime / 1000);
 	            if (!this.drawing) {
 	                this.draw();
 	            } else {
@@ -372,7 +379,7 @@
 	    }, {
 	        key: 'lastUpdate',
 	        get: function get() {
-	            this._lU || this.config.window.performance.now();
+	            return this._lU || this.config.window.performance.now();
 	        },
 	        set: function set(v) {
 	            this._lU = v;
@@ -420,6 +427,7 @@
 	exports.Component = _component2.default;
 	exports.Script = _script2.default;
 	exports.geMath = _math2.default;
+	exports.BASIC_SCRIPTS = _index2.default;
 
 /***/ },
 /* 3 */
@@ -16522,6 +16530,16 @@
 	                    resolve();
 	                };
 
+	                img.onError = function () {
+	                    reject({
+	                        message: 'Image error',
+	                        data: {
+	                            name: name,
+	                            params: params
+	                        }
+	                    });
+	                };
+
 	                img.src = params.url;
 	            });
 	        }
@@ -17492,6 +17510,8 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+	var PI2 = Math.PI * 2;
+
 	var GameObject = function () {
 	    _createClass(GameObject, [{
 	        key: 'x',
@@ -17508,6 +17528,14 @@
 	        },
 	        set: function set(y) {
 	            this._.y = y;
+	        }
+	    }, {
+	        key: 'rotation',
+	        get: function get() {
+	            return this._.rotation || 0;
+	        },
+	        set: function set(r) {
+	            this._.rotation = r - (r / PI2 | 0) * PI2;
 	        }
 	    }, {
 	        key: 'isDrawable',
@@ -17554,8 +17582,8 @@
 	            this.destroyed = true;
 
 	            var c = this.sprites.length;
-	            for (var _i = 0; _i < c; _i++) {
-	                this.sprites[_i].destroy();
+	            for (var i = 0; i < c; i++) {
+	                this.sprites[i].destroy();
 	            }
 	        }
 	    }, {
@@ -17571,12 +17599,12 @@
 	        key: 'update',
 	        value: function update(dT) {
 	            var c = this.updateScripts.length;
-	            for (var _i2 = 0; _i2 < c; _i2++) {
-	                this.updateScripts[_i2].update(dT);
+	            for (var i = 0; i < c; i++) {
+	                this.updateScripts[i].update(dT);
 	            }
 
 	            var c2 = this.sprites.length;
-	            for (var j = 0; j < c2; i++) {
+	            for (var j = 0; j < c2; j++) {
 	                this.sprites[j].update(this);
 	            }
 	        }
@@ -47612,20 +47640,26 @@
 
 	        _this.type = TYPE;
 
-	        _this.sprite = new _pixi2.default.Sprite(_pixi2.default.Texture.fromCanvas(_images2.default.getImage(imageName)));
-
-	        // debugger;
-
-	        /* DEV */
-	        _this.sprite.position.x = 200;
-	        _this.sprite.position.y = 200;
+	        _this.loadImage(imageName);
 
 	        return _this;
 	    }
 
 	    _createClass(PIXISprite, [{
+	        key: 'loadImage',
+	        value: function loadImage(imageName) {
+	            var canvas = _images2.default.getImage(imageName);
+
+	            this.sprite = new _pixi2.default.Sprite(_pixi2.default.Texture.fromCanvas(canvas));
+	            this.sprite.anchor.x = 0.5;
+	            this.sprite.anchor.y = 0.5;
+	        }
+	    }, {
 	        key: 'update',
 	        value: function update(object) {
+	            this.sprite.position.x = object.x;
+	            this.sprite.position.y = object.y;
+	            this.sprite.rotation = object.rotation;
 	            console.warn('TODO: PIXISprite.update');
 	        }
 	    }, {
@@ -47896,8 +47930,8 @@
 	            _get(Object.getPrototypeOf(testLevel.prototype), 'start', this).call(this);
 
 	            var test = _engine.ObjectFactory.spawn('test', {
-	                x: 100,
-	                y: 100
+	                x: 200,
+	                y: 200
 	            });
 	        }
 	    }]);
@@ -47938,6 +47972,7 @@
 	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(TestObject).call(this));
 
 	        _this.addComponent(_engine2.default.gameRenderer.createSprite('Smile'));
+	        _this.addComponent(new _engine.BASIC_SCRIPTS.ROTATE());
 	        return _this;
 	    }
 
@@ -47945,6 +47980,80 @@
 	}(_engine.GameObject);
 
 	exports.default = TestObject;
+
+/***/ },
+/* 162 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _rotate = __webpack_require__(163);
+
+	var _rotate2 = _interopRequireDefault(_rotate);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var index = {
+	    ROTATE: _rotate2.default
+	};
+
+	exports.default = index;
+
+/***/ },
+/* 163 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _script = __webpack_require__(20);
+
+	var _script2 = _interopRequireDefault(_script);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var PI2 = Math.PI * 2;
+
+	var Rotate = function (_Script) {
+	    _inherits(Rotate, _Script);
+
+	    function Rotate(speed) {
+	        _classCallCheck(this, Rotate);
+
+	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Rotate).call(this));
+
+	        _this.speed = speed || 1;
+	        return _this;
+	    }
+
+	    _createClass(Rotate, [{
+	        key: 'update',
+	        value: function update(dT) {
+	            // console.log('Rotete.update', this.object.rotation, this.speed * dT);
+	            // debugger;
+	            this.object.rotation += this.speed * (dT * PI2);
+	        }
+	    }]);
+
+	    return Rotate;
+	}(_script2.default);
+
+	exports.default = Rotate;
 
 /***/ }
 /******/ ]);

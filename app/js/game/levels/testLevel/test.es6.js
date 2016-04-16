@@ -13,8 +13,8 @@ class testLevel extends Level {
         super.start();
 
         let test = ObjectFactory.spawn('test', {
-            x: 100,
-            y: 100
+            x: 200,
+            y: 200
         })
     }
 }

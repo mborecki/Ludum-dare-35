@@ -1,4 +1,5 @@
 import Engine from './engine.es6';
+const PI2 = Math.PI * 2;
 
 class GameObject {
 
@@ -16,6 +17,14 @@ class GameObject {
 
     set y (y) {
         this._.y = y;
+    }
+
+    get rotation() {
+        return this._.rotation || 0;
+    }
+
+    set rotation(r) {
+        this._.rotation = r - (((r/PI2)|0) * PI2);
     }
 
     get isDrawable() {
@@ -71,7 +80,7 @@ class GameObject {
         }
 
         let c2 = this.sprites.length;
-        for (let j = 0; j < c2; i++) {
+        for (let j = 0; j < c2; j++) {
             this.sprites[j].update(this);
         }
     }
