@@ -1,12 +1,14 @@
-import {ObjectFactory, Level} from './../../engine/engine.es6';
+import {ObjectFactory, Level, GameObject, BASIC_SCRIPTS} from './../../engine/engine.es6';
 
 import TestObject from './objects/testObject.es6';
+import SoundObject from './objects/soundObject.es6';
 
 class testLevel extends Level {
     constructor () {
         super();
 
         ObjectFactory.register('test', TestObject);
+        ObjectFactory.register('sound-test', SoundObject);
     }
 
     start() {
@@ -16,6 +18,8 @@ class testLevel extends Level {
             x: 200,
             y: 200
         })
+
+        ObjectFactory.spawn('sound-test');
     }
 }
 

@@ -68,6 +68,16 @@ class Engine {
     start() {
         console.info('Engine.start');
 
+        let oCount = this.objects.length;
+
+        for (var i = 0; i < oCount; i++) {
+            let o = this.objects[i];
+            if (!o.destroyed) {
+                console.log('o.start');
+                o.start();
+            }
+        }
+
         this.lastUpdate = window.performance.now();
         this.started = true;
         this.loop();
@@ -181,6 +191,7 @@ const e = new Engine();
 e.geMath = geMath;
 e.PIXI = PIXI;
 e.Images = Images;
+e.Sounds = Sounds;
 e.Level = Level;
 e.GameObject = GameObject;
 e.ObjectFactory = ObjectFactory;
@@ -196,6 +207,7 @@ export {Level as Level};
 export {GameObject as GameObject};
 export {ObjectFactory as ObjectFactory};
 export {Images as Images};
+export {Sounds as Sounds};
 export {Component as Component};
 export {Script as Script};
 export {geMath as geMath};

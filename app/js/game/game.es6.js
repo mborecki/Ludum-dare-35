@@ -15,6 +15,7 @@ class Game {
 
         this.registerImages().then(() => {
             console.info('Images Loaded');
+            this.registerSounds();
             this.initKeyBindings();
             this.initLevels();
 
@@ -36,6 +37,12 @@ class Game {
                 url: 'assets/images/smile.png'
             })
         ]);
+    }
+
+    registerSounds() {
+        Engine.Sounds.register('test-sound', {
+            url: 'assets/sounds/test-sound.wav'
+        })
     }
 
     initLevels() {

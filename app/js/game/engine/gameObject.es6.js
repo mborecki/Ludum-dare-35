@@ -45,6 +45,7 @@ class GameObject {
 
         this.scripts = [];
         this.updateScripts = [];
+        this.startScripts = [];
         this.sprites = [];
 
         this.reset();
@@ -71,6 +72,12 @@ class GameObject {
         if (!dontAddToEngine) Engine.addObject(this);
 
         return this;
+    }
+
+    start() {
+        for (let i = 0; i < this.startScripts.length; i++) {
+            this.startScripts[i].start();
+        }
     }
 
     update (dT) {
@@ -115,6 +122,10 @@ class GameObject {
         if (typeof script.update === 'function') {
             this.updateScripts.push(script);
             this._.needUpdate = true;
+        }
+
+        if (typeof script.start === 'function') {
+            this.startScripts.push(script);
         }
     }
 

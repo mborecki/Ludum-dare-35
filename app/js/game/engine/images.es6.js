@@ -1,7 +1,5 @@
 import Promise from 'promise';
 
-let singleton = null;
-
 class Images {
     constructor() {
         this.images = {};
