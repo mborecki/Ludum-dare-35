@@ -17660,7 +17660,6 @@
 	    }, {
 	        key: 'create',
 	        value: function create(dontAddToEngine) {
-	            // console.log('create', dontAddToEngine)
 	            this.destroyed = false;
 	            if (!dontAddToEngine) _engine2.default.addObject(this);
 
@@ -48949,7 +48948,6 @@
 
 	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(LoopSound).call(this));
 
-	        console.log('LoopSound.constructor');
 	        _this.params = params;
 	        return _this;
 	    }
@@ -48961,7 +48959,6 @@
 	            var sound = _sounds2.default.getSound(this.params.name);
 	            if (sound) {
 	                setInterval(function () {
-	                    console.log('PLAY!');
 	                    sound.play();
 	                }, this.params.interval);
 	            }

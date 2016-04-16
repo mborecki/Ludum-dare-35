@@ -67,7 +67,6 @@ class GameObject {
     }
 
     create (dontAddToEngine) {
-        // console.log('create', dontAddToEngine)
         this.destroyed = false;
         if (!dontAddToEngine) Engine.addObject(this);
 

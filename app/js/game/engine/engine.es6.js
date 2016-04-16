@@ -73,7 +73,6 @@ class Engine {
         for (var i = 0; i < oCount; i++) {
             let o = this.objects[i];
             if (!o.destroyed) {
-                console.log('o.start');
                 o.start();
             }
         }
@@ -145,7 +144,6 @@ class Engine {
     }
 
     addObject (object) {
-        console.log('addObject', object)
         if (object.isDrawable) {
             this.gameRenderer.add(object);
         }
@@ -199,8 +197,6 @@ e.Component = Component;
 e.Script = Script;
 
 export default e;
-
-console.log(Component)
 
 export {PIXI as PIXI};
 export {Level as Level};
