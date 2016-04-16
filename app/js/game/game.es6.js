@@ -5,12 +5,10 @@ import TestLevel from './levels/testLevel/test.es6';
 class Game {
     constructor(data) {
         console.info('Game init');
-
-        this.init(data);
+        Engine.setConfig(data);
     }
 
-    init(data) {
-        Engine.setConfig(data);
+    init() {
 
         this.initKeyBindings();
         this.initImages();

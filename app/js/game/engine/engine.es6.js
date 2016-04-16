@@ -82,7 +82,9 @@ class Engine {
         switch(this.config.renderer) {
             case 'pixi':
             default:
-                this.gameRenderer = new PIXIRenderer();
+                this.gameRenderer = new PIXIRenderer({
+                    container: this.config.container
+                });
         }
     }
 

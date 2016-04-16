@@ -54,13 +54,13 @@
 
 	(function (w) {
 
-	    var game = new _game2.default({
-	        container: w.document.body,
-	        window: w
-	    });
-
 	    w.onload = function () {
 	        console.info('APP INIT');
+
+	        var game = new _game2.default({
+	            container: w.document.body,
+	            window: w
+	        });
 
 	        game.init();
 	    };
@@ -95,14 +95,12 @@
 	        _classCallCheck(this, Game);
 
 	        console.info('Game init');
-
-	        this.init(data);
+	        _engine2.default.setConfig(data);
 	    }
 
 	    _createClass(Game, [{
 	        key: 'init',
-	        value: function init(data) {
-	            _engine2.default.setConfig(data);
+	        value: function init() {
 
 	            this.initKeyBindings();
 	            this.initImages();
@@ -232,7 +230,9 @@
 	            switch (this.config.renderer) {
 	                case 'pixi':
 	                default:
-	                    this.gameRenderer = new _pixi2.default();
+	                    this.gameRenderer = new _pixi2.default({
+	                        container: this.config.container
+	                    });
 	            }
 	        }
 
@@ -16908,8 +16908,11 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var PIXIRenderer = function () {
-	    function PIXIRenderer() {
+	    function PIXIRenderer(data) {
 	        _classCallCheck(this, PIXIRenderer);
+
+	        console.warn('PIXIRenderer.constructor');
+	        data.container.appendChild(this.renderer.view);
 	    }
 
 	    _createClass(PIXIRenderer, [{
@@ -16917,9 +16920,23 @@
 	        value: function draw(onComplete) {
 	            console.warn('TODO: PIXIRenderer.draw');
 
+	            this.renderer.render(this.stage);
+
 	            if (typeof onComplete === 'function') {
 	                onComplete();
 	            }
+	        }
+	    }, {
+	        key: 'stage',
+	        get: function get() {
+	            if (!this._stage) this._stage = new _pixi2.default.Container();
+	            return this._stage;
+	        }
+	    }, {
+	        key: 'renderer',
+	        get: function get() {
+	            if (!this._renderer) this._renderer = new _pixi2.default.autoDetectRenderer(800, 600);
+	            return this._renderer;
 	        }
 	    }]);
 
