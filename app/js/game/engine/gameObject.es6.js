@@ -19,7 +19,7 @@ class GameObject {
     }
 
     get isDrawable() {
-        return !this.destroyed && typeof this.draw === "function";
+        return !this.destroyed && !!this.sprites.length;
     }
 
     get isUpdateable() {
@@ -36,6 +36,7 @@ class GameObject {
 
         this.scripts = [];
         this.updateScripts = [];
+        this.sprites = [];
 
         this.reset();
         this.updateParams(params)
@@ -48,6 +49,11 @@ class GameObject {
 
     destroy () {
         this.destroyed = true;
+
+        let c = this.sprites.length;
+        for (let i = 0; i < c; i++) {
+            this.sprites[i].destroy();
+        }
     }
 
     create (dontAddToEngine) {
@@ -62,6 +68,11 @@ class GameObject {
         let c = this.updateScripts.length;
         for (let i = 0; i < c; i++) {
             this.updateScripts[i].update(dT);
+        }
+
+        let c2 = this.sprites.length;
+        for (let j = 0; j < c2; i++) {
+            this.sprites[j].update(this);
         }
     }
 
@@ -78,16 +89,15 @@ class GameObject {
                 this.addScript(component);
                 break;
 
+            case 'PIXI_SPRITE':
+                this.addSprite(component);
+                break;
+
             default:
                 console.warn(`Unknow component type: ${component.type}`);
         }
 
         component.object = this;
-    }
-
-    addRenderer (renderer) {
-        this.draw = (ctx) => renderer.draw(ctx, this.location);
-        this.renderer = renderer;
     }
 
     addScript (script) {
@@ -97,6 +107,10 @@ class GameObject {
             this.updateScripts.push(script);
             this._.needUpdate = true;
         }
+    }
+
+    addSprite (sprite) {
+        this.sprites.push(sprite);
     }
 }
 

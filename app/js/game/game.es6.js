@@ -1,3 +1,5 @@
+import Promise from 'promise';
+
 import Engine from './engine/engine.es6';
 
 import TestLevel from './levels/testLevel/test.es6';
@@ -6,27 +8,31 @@ class Game {
     constructor(data) {
         console.info('Game init');
         Engine.setConfig(data);
+        Engine.initRenderer();
     }
 
     init() {
 
-        this.initKeyBindings();
-        this.initImages();
-        this.initLevels();
+        this.registerImages().then(() => {
+            this.initKeyBindings();
+            this.initLevels();
 
-        Engine.start()
+            Engine.start()
+        });
     }
 
     initKeyBindings() {
         //TODO
     }
 
-    initImages() {
-        Engine.Images.register('Smile', {
-            origin: [0, 0],
-            size: [],
-            url: 'assets/images/smile.png'
-        })
+    registerImages() {
+        return Promise.all([
+            Engine.Images.register('Smile', {
+                origin: [0, 0],
+                size: [224, 224],
+                url: 'assets/images/smile.png'
+            })
+        ]);
     }
 
     initLevels() {

@@ -1,9 +1,10 @@
-import {GameObject} from './../../../engine/engine.es6';
-
+import Engine, {GameObject} from './../../../engine/engine.es6';
 
 class TestObject extends GameObject {
-    constructor () {
+    constructor() {
         super();
+
+        this.addComponent(Engine.gameRenderer.createSprite('Smile'));
     }
 }
 

@@ -4,6 +4,7 @@ import Images from './images.es6';
 import Level from './level.es6';
 import GameObject from './gameObject.es6';
 import ObjectFactory from './objectFactory.es6';
+import Component from './component.es6';
 import Script from './script.es6';
 
 import PIXIRenderer from './renderers/pixi.es6';
@@ -20,6 +21,13 @@ import geMath from './utils/math/math.es6';
 class Engine {
     constructor() {
         this.ver = 0;
+
+        this._config = {};
+        this._objects = [];
+        this._levels = {};
+
+        /* DEV */
+        window.Engine = this;
     }
 
     setConfig(data) {
@@ -27,9 +35,6 @@ class Engine {
     }
 
     get config() {
-        if (!this._config) {
-            this._config = {};
-        }
         return this._config;
     }
 
@@ -48,16 +53,10 @@ class Engine {
     }
 
     get levels() {
-        if (!this._levels) {
-            this._levels = {};
-        }
         return this._levels;
     }
 
     get objects() {
-        if (!this._objects) {
-            this._objects = {};
-        }
         return this._objects;
     }
 
@@ -66,8 +65,6 @@ class Engine {
      */
     start() {
         console.info('Engine.start');
-
-        this.initRenderer();
 
         this.lastUpdate = window.performance.now();
         this.started = true;
@@ -185,14 +182,19 @@ e.Images = Images;
 e.Level = Level;
 e.GameObject = GameObject;
 e.ObjectFactory = ObjectFactory;
+e.Component = Component;
 e.Script = Script;
 
 export default e;
+
+console.log(Component)
 
 export {PIXI as PIXI};
 export {Level as Level};
 export {GameObject as GameObject};
 export {ObjectFactory as ObjectFactory};
+export {Images as Images};
+export {Component as Component};
 export {Script as Script};
 export {geMath as geMath};
 

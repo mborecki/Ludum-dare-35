@@ -1,4 +1,5 @@
 import PIXI from 'pixi.js';
+import PIXISprite from './pixi.sprite.es6';
 
 class PIXIRenderer {
     constructor(data) {
@@ -16,14 +17,22 @@ class PIXIRenderer {
         return this._renderer;
     }
 
-    draw(onComplete) {
-        console.warn('TODO: PIXIRenderer.draw');
+    add(gameObject) {
+        for (let i = 0; i < gameObject.sprites.length; i++) {
+            this.stage.addChild(gameObject.sprites[i].sprite);
+        }
+    }
 
+    draw(onComplete) {
         this.renderer.render(this.stage);
 
         if (typeof onComplete === 'function') {
             onComplete();
         }
+    }
+
+    createSprite(imageName) {
+        return new PIXISprite(imageName)
     }
 }
 

@@ -1,12 +1,21 @@
-import Engine from './../../engine/engine.es6';
+import {ObjectFactory, Level} from './../../engine/engine.es6';
 
 import TestObject from './objects/testObject.es6';
 
-class testLevel extends Engine.Level {
+class testLevel extends Level {
     constructor () {
         super();
 
-        Engine.ObjectFactory.register('test', TestObject);
+        ObjectFactory.register('test', TestObject);
+    }
+
+    start() {
+        super.start();
+
+        let test = ObjectFactory.spawn('test', {
+            x: 100,
+            y: 100
+        })
     }
 }
 
